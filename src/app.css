@@ -1,0 +1,10 @@
+/* App-wide styles layered on top of Bootstrap 5.3. Keep this lean — prefer
+   Bootstrap utility classes in markup over custom CSS. */
+
+:root {
+  --dd-brand: #d9480f;
+}
+
+.dd-brand {
+  color: var(--dd-brand);
+}

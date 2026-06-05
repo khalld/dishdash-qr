@@ -1,0 +1,48 @@
+# render.yaml — Render Blueprint (Infrastructure as Code)
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Reuses the multi-stage Dockerfile. Render builds the image on its own
+# infrastructure; GitHub Actions gates the deploy (see
+# .github/workflows/deploy.yml) by calling the Render API only after CI
+# (type-check + build) passes, so a broken build never reaches production.
+#
+# autoDeploy is OFF on purpose: deploys are triggered by the GitHub Action
+# (JorgeLNJunior/render-deploy, using RENDER_SERVICE_ID + RENDER_API_KEY).
+
+services:
+  - type: web
+    name: dishdash-qr
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free # change to "starter" to avoid free-tier spin-down
+    region: frankfurt # closest EU region
+    branch: main
+    autoDeploy: false # GitHub Actions triggers deploys after CI passes
+    healthCheckPath: /
+
+    envVars:
+      # --- Runtime config (safe to commit) ---
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '3000' # must match EXPOSE in the Dockerfile
+      - key: HOST
+        value: 0.0.0.0
+
+      # --- Secrets / per-environment values: set in the Render dashboard ---
+      # sync:false => Render keeps the value, it is NOT read from this file.
+      - key: MONGODB_URI
+        sync: false
+      # Required by adapter-node behind a proxy for CSRF/form-action origin
+      # checks. Set to the full app URL, e.g. https://dishdash-qr.onrender.com
+      - key: ORIGIN
+        sync: false
+
+      # --- Initial superuser bootstrap (created by the deploy workflow) ---
+      # The first superuser is provisioned out-of-band via `npm run
+      # create-superuser`; there is no public registration. See CLAUDE.md §3.
+      - key: SUPERUSER_USERNAME
+        sync: false
+      - key: SUPERUSER_PASSWORD
+        sync: false

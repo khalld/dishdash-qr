@@ -1,0 +1,48 @@
+{
+  "name": "dishdash-qr",
+  "version": "0.0.1",
+  "description": "Multitenant QR ordering app for pubs / street-food (SvelteKit + MongoDB)",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "prettier --check . && eslint .",
+    "format": "prettier --write .",
+    "seed": "node scripts/seed.mjs",
+    "create-superuser": "node scripts/create-superuser.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@sveltejs/adapter-node": "^5.5.4",
+    "@sveltejs/kit": "^2.63.0",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@types/qrcode": "^1.5.6",
+    "eslint": "^9.39.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.19.0",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-svelte": "^4.1.0",
+    "svelte": "^5.56.2",
+    "svelte-check": "^4.6.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.1",
+    "vite": "^8.0.16"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "bootstrap": "^5.3.8",
+    "dotenv": "^17.4.2",
+    "mongoose": "^9.6.3",
+    "qrcode": "^1.5.4",
+    "zod": "^4.4.3"
+  }
+}
