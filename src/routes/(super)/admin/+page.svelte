@@ -1,9 +1,6 @@
 <script lang="ts">
-  // Superuser dashboard. Provisioning flows land in milestone M2.
+  // /admin redirects to /admin/tenants in +page.server.ts; this is only a
+  // fallback if the redirect is ever bypassed.
 </script>
 
-<h1 class="h3 mb-3">Amministrazione</h1>
-<p class="text-secondary">
-  Crea tenant e relativi loghi, crea gestori e assegnali a un tenant, crea lavoratori. (CRUD —
-  milestone M2.)
-</p>
+<p class="text-secondary">Reindirizzamento…</p>

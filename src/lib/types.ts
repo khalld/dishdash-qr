@@ -56,9 +56,11 @@ export interface OrderView {
   id: string;
   trackToken: string;
   nickname: string;
+  source: string; // QrSource label snapshot, e.g. "Tavolo 5"
   status: OrderStatus;
   number: number | null;
   items: OrderItemView[];
   total: number; // cents
   createdAt: string;
+  updatedAt: string; // drives the fresh-change highlight on staff queues
 }

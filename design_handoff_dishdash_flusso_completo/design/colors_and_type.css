@@ -1,0 +1,221 @@
+/* ============================================================================
+   DishDash QR — Foundational tokens (colors + type)
+   ----------------------------------------------------------------------------
+   The product is built on **Bootstrap 5.3 (CSS only)**. This file mirrors the
+   Bootstrap defaults the app relies on, and layers the one brand decision the
+   codebase makes: the DishDash orange (`--dd-brand: #d9480f`, used via the
+   `.dd-brand` accent class in src/app.css).
+
+   The orange is Open Color `orange-9`; the full orange ramp below comes from
+   the Open Color scale, which pairs naturally with Bootstrap's palette.
+
+   USAGE NOTE — In the live repo the orange is applied as a TEXT ACCENT only
+   (the "QR" in the wordmark, the role labels) while action buttons keep
+   Bootstrap's default blue primary. For a stronger, coherent brand we
+   RECOMMEND promoting the orange to `--bs-primary` (one override, shown in the
+   "Branded primary" block). Both values are documented so you can match the
+   repo exactly or use the branded variant.
+   ============================================================================ */
+
+:root {
+  /* ---- Brand ---------------------------------------------------------- */
+  --dd-brand: #d9480f; /* DishDash orange — Open Color orange-9   */
+  --dd-brand-hover: #c43d0a; /* pressed / hover (orange-9 darkened ~8%) */
+  --dd-brand-active: #ad3608;
+
+  /* Orange ramp (Open Color) — tints & shades of the brand */
+  --dd-orange-0: #fff4e6;
+  --dd-orange-1: #ffe8cc;
+  --dd-orange-2: #ffd8a8;
+  --dd-orange-3: #ffc078;
+  --dd-orange-4: #ffa94d;
+  --dd-orange-5: #ff922b;
+  --dd-orange-6: #fd7e14;
+  --dd-orange-7: #f76707;
+  --dd-orange-8: #e8590c;
+  --dd-orange-9: #d9480f; /* = --dd-brand */
+
+  /* ---- Bootstrap 5.3 theme colors (defaults) -------------------------- */
+  --bs-primary: #0d6efd; /* default Bootstrap blue (repo as-is)      */
+  --bs-secondary: #6c757d;
+  --bs-success: #198754;
+  --bs-info: #0dcaf0;
+  --bs-warning: #ffc107;
+  --bs-danger: #dc3545;
+  --bs-light: #f8f9fa;
+  --bs-dark: #212529;
+
+  /* ---- Grayscale (Bootstrap gray ramp) -------------------------------- */
+  --bs-gray-100: #f8f9fa;
+  --bs-gray-200: #e9ecef;
+  --bs-gray-300: #dee2e6;
+  --bs-gray-400: #ced4da;
+  --bs-gray-500: #adb5bd;
+  --bs-gray-600: #6c757d;
+  --bs-gray-700: #495057;
+  --bs-gray-800: #343a40;
+  --bs-gray-900: #212529;
+
+  /* ---- Surfaces & text (Bootstrap light theme) ------------------------ */
+  --bs-body-bg: #ffffff;
+  --bs-body-color: #212529; /* fg1 — primary text                  */
+  --bs-secondary-color: #6c757d; /* fg2 — .text-secondary muted text    */
+  --bs-tertiary-bg: #f8f9fa; /* bg-body-tertiary — navbars/panels   */
+  --bs-border-color: #dee2e6;
+  --bs-border-color-translucent: rgba(0, 0, 0, 0.175);
+
+  /* ---- Order-status semantic colors (from the tracking screen) -------- *
+   * The order state machine maps each status to a Bootstrap contextual
+   * color. These are the canonical badge colors across the staff queues
+   * and the customer tracking page.                                       */
+  --dd-status-attesa: var(--bs-warning); /* IN_ATTESA       (text-bg-warning)   */
+  --dd-status-confermata: var(--bs-info); /* CONFERMATA      (text-bg-info)       */
+  --dd-status-preparazione: var(--bs-info); /* IN_PREPARAZIONE (text-bg-info)       */
+  --dd-status-pronta: var(--bs-success); /* PRONTA          (text-bg-success)    */
+  --dd-status-consegnata: var(--bs-success); /* CONSEGNATA      (text-bg-success)    */
+  --dd-status-rifiutata: var(--bs-danger); /* RIFIUTATA       (text-bg-danger)     */
+  --dd-status-annullata: var(--bs-danger); /* ANNULLATA       (text-bg-danger)     */
+  --dd-status-carrello: var(--bs-secondary); /* CARRELLO        (text-bg-secondary)  */
+
+  /* ====================================================================== *
+     TYPOGRAPHY — Bootstrap 5.3 native system font stack (no webfonts)
+     ====================================================================== */
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', 'Liberation Sans',
+    Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Base */
+  --fs-root: 1rem; /* 16px */
+  --lh-base: 1.5;
+
+  /* Font weights used in the app */
+  --fw-light: 300;
+  --fw-normal: 400;
+  --fw-medium: 500; /* .fw-medium — used on menu item names              */
+  --fw-semibold: 600;
+  --fw-bold: 700; /* .fw-bold — wordmark, display headings             */
+
+  /* Type scale (Bootstrap heading + display sizes) */
+  --fs-display-5: 3rem; /* 48px — landing hero (.display-5)              */
+  --fs-display-6: 2.5rem; /* 40px — order number (.display-6)             */
+  --fs-h1: 2.5rem; /* 40px */
+  --fs-h2: 2rem; /* 32px */
+  --fs-h3: 1.75rem; /* 28px — page titles (.h3)                     */
+  --fs-h4: 1.5rem; /* 24px — tenant/screen titles (.h4)            */
+  --fs-h5: 1.25rem; /* 20px — card titles (.h5)                     */
+  --fs-h6: 1rem; /* 16px */
+  --fs-lead: 1.25rem; /* 20px — .lead intro copy                      */
+  --fs-body: 1rem; /* 16px — base body                            */
+  --fs-small: 0.875rem; /* 14px — .small, captions, .text-secondary    */
+
+  /* ---- Radii (Bootstrap) ---------------------------------------------- */
+  --bs-border-radius-sm: 0.25rem;
+  --bs-border-radius: 0.375rem; /* default — cards, inputs, buttons      */
+  --bs-border-radius-lg: 0.5rem;
+  --bs-border-radius-xl: 1rem;
+  --bs-border-radius-pill: 50rem; /* badges/pills                          */
+
+  /* ---- Elevation (Bootstrap shadows) ---------------------------------- */
+  --bs-box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --bs-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --bs-box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+
+  /* ---- Spacing scale (Bootstrap .p-* / .m-* / gap) -------------------- */
+  --space-1: 0.25rem; /*  4px */
+  --space-2: 0.5rem; /*  8px */
+  --space-3: 1rem; /* 16px */
+  --space-4: 1.5rem; /* 24px */
+  --space-5: 3rem; /* 48px */
+}
+
+/* ============================================================================
+   BRANDED PRIMARY (recommended override)
+   ----------------------------------------------------------------------------
+   Promote the DishDash orange to Bootstrap's primary so action buttons, links
+   and focus rings carry the brand. Apply by adding the `dd-branded` class to
+   <html> or <body>, or copy these into your :root.
+   ============================================================================ */
+.dd-branded {
+  --bs-primary: var(--dd-brand);
+  --bs-primary-rgb: 217, 72, 15;
+  --bs-link-color: var(--dd-brand);
+  --bs-link-color-rgb: 217, 72, 15;
+  --bs-link-hover-color: var(--dd-brand-hover);
+}
+/* Bootstrap 5.3 bakes literal colors into .btn-primary, so promoting
+   --bs-primary alone is not enough — re-map the button's own CSS vars. */
+.dd-branded .btn-primary {
+  --bs-btn-bg: var(--dd-brand);
+  --bs-btn-border-color: var(--dd-brand);
+  --bs-btn-hover-bg: var(--dd-brand-hover);
+  --bs-btn-hover-border-color: var(--dd-brand-hover);
+  --bs-btn-active-bg: var(--dd-brand-active);
+  --bs-btn-active-border-color: var(--dd-brand-active);
+  --bs-btn-disabled-bg: var(--dd-brand);
+  --bs-btn-disabled-border-color: var(--dd-brand);
+}
+.dd-branded .btn-outline-primary {
+  --bs-btn-color: var(--dd-brand);
+  --bs-btn-border-color: var(--dd-brand);
+  --bs-btn-hover-bg: var(--dd-brand);
+  --bs-btn-hover-border-color: var(--dd-brand);
+  --bs-btn-active-bg: var(--dd-brand);
+  --bs-btn-active-border-color: var(--dd-brand);
+}
+/* Focus ring + checked switches/checks pick up the brand too. */
+.dd-branded .form-check-input:checked {
+  background-color: var(--dd-brand);
+  border-color: var(--dd-brand);
+}
+.dd-branded .form-control:focus,
+.dd-branded .form-select:focus,
+.dd-branded .btn:focus-visible {
+  border-color: var(--dd-orange-3);
+  box-shadow: 0 0 0 0.25rem rgba(217, 72, 15, 0.25);
+}
+
+/* Brand accent text — mirrors src/app.css */
+.dd-brand {
+  color: var(--dd-brand);
+}
+
+/* ============================================================================
+   SEMANTIC TYPE — apply these to get the app's heading rhythm without
+   re-deriving Bootstrap classes. (Bootstrap supplies the same via h1..h6.)
+   ============================================================================ */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-base);
+  color: var(--bs-body-color);
+  background: var(--bs-body-bg);
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-mono);
+}
+.dd-h3 {
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+}
+.dd-h4 {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+}
+.dd-h5 {
+  font-size: var(--fs-h5);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+}
+.dd-lead {
+  font-size: var(--fs-lead);
+  font-weight: var(--fw-light);
+}
+.dd-muted {
+  color: var(--bs-secondary-color);
+}

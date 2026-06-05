@@ -1,34 +1,20 @@
-import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
-import { connectDb } from '$lib/server/db';
-import { Order } from '$lib/server/models';
-import type { OrderView } from '$lib/types';
+import type { Actions, PageServerLoad } from './$types';
+import { getOrderByTrackToken } from '$lib/server/repositories/order-repository';
+import { cancelOrderByTrackToken } from '$lib/server/domain/order-service';
 
-// Client order tracking. The opaque trackToken is the only credential the
-// client has (no login). The token uniquely identifies the order and, with it,
-// the tenant — so no extra tenant scoping is needed for a read-by-token.
+// Client order tracking. The opaque trackToken is the only credential the client
+// has (no login). It uniquely identifies the order and, with it, the tenant — so
+// no extra tenant scoping is needed for a read-by-token. The page polls this
+// load to reflect staff progress live.
 export const load: PageServerLoad = async ({ params }) => {
-  await connectDb();
-  const order = await Order.findOne({ trackToken: params.trackToken }).lean();
-  if (!order) throw error(404, 'Comanda non trovata');
+  return { order: await getOrderByTrackToken(params.trackToken) };
+};
 
-  const view: OrderView = {
-    id: String(order._id),
-    trackToken: order.trackToken,
-    nickname: order.nickname,
-    status: order.status,
-    number: order.number,
-    items: order.items.map((i) => ({
-      menuItemId: String(i.menuItemId),
-      name: i.name,
-      qty: i.qty,
-      unitPrice: i.unitPrice,
-      notes: i.notes ?? ''
-    })),
-    total: order.total,
-    createdAt:
-      order.createdAt instanceof Date ? order.createdAt.toISOString() : String(order.createdAt)
-  };
-
-  return { order: view };
+export const actions: Actions = {
+  // Customer cancellation — allowed only while IN_ATTESA (enforced by the state
+  // machine inside the service). Re-running load reflects the new status.
+  cancel: async ({ params }) => {
+    await cancelOrderByTrackToken(params.trackToken);
+    return { ok: true };
+  }
 };

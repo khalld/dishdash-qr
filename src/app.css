@@ -1,10 +1,191 @@
 /* App-wide styles layered on top of Bootstrap 5.3. Keep this lean — prefer
-   Bootstrap utility classes in markup over custom CSS. */
+   Bootstrap utility classes in markup over custom CSS. The few rules here are
+   either brand tokens or the handful of bespoke effects the design calls for
+   (tracking stepper, fresh-order flash, the monthly report bar chart and the
+   JS-free modal). Everything else is plain Bootstrap. */
 
 :root {
-  --dd-brand: #d9480f;
+  /* ---- Brand --------------------------------------------------------- */
+  --dd-brand: #d9480f; /* DishDash orange — Open Color orange-9 */
+  --dd-brand-hover: #c43d0a;
+  --dd-brand-active: #ad3608;
+
+  /* Orange ramp (Open Color) — only the few steps the UI actually uses. */
+  --dd-orange-3: #ffc078; /* weekday bars / asporto channel segment */
 }
 
+/* ============================================================================
+   BRANDED PRIMARY
+   Promote the DishDash orange to Bootstrap's primary so action buttons, links
+   and focus rings carry the brand. Applied via the `dd-branded` class on <body>
+   (see src/app.html). Bootstrap 5.3 bakes literal colors into .btn-primary, so
+   promoting --bs-primary alone is not enough — the button's own CSS vars are
+   re-mapped too.
+   ============================================================================ */
+.dd-branded {
+  --bs-primary: var(--dd-brand);
+  --bs-primary-rgb: 217, 72, 15;
+  --bs-link-color: var(--dd-brand);
+  --bs-link-color-rgb: 217, 72, 15;
+  --bs-link-hover-color: var(--dd-brand-hover);
+}
+.dd-branded .btn-primary {
+  --bs-btn-bg: var(--dd-brand);
+  --bs-btn-border-color: var(--dd-brand);
+  --bs-btn-hover-bg: var(--dd-brand-hover);
+  --bs-btn-hover-border-color: var(--dd-brand-hover);
+  --bs-btn-active-bg: var(--dd-brand-active);
+  --bs-btn-active-border-color: var(--dd-brand-active);
+  --bs-btn-disabled-bg: var(--dd-brand);
+  --bs-btn-disabled-border-color: var(--dd-brand);
+}
+.dd-branded .btn-outline-primary {
+  --bs-btn-color: var(--dd-brand);
+  --bs-btn-border-color: var(--dd-brand);
+  --bs-btn-hover-bg: var(--dd-brand);
+  --bs-btn-hover-border-color: var(--dd-brand);
+  --bs-btn-active-bg: var(--dd-brand);
+  --bs-btn-active-border-color: var(--dd-brand);
+}
+.dd-branded .form-check-input:checked {
+  background-color: var(--dd-brand);
+  border-color: var(--dd-brand);
+}
+.dd-branded .form-control:focus,
+.dd-branded .form-select:focus,
+.dd-branded .btn:focus-visible {
+  border-color: var(--dd-orange-3);
+  box-shadow: 0 0 0 0.25rem rgba(217, 72, 15, 0.25);
+}
+
+/* Brand accent text — the "QR"/role token in the wordmark. */
 .dd-brand {
   color: var(--dd-brand);
+}
+
+/* ---- Tenant logo placeholder (initials box; fallback for tenant.logoUrl) -- */
+.dd-tenant-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #f1f3f5;
+  color: #adb5bd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex: none;
+}
+
+/* ---- Customer tracking stepper ------------------------------------------ */
+.dd-step-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+.dd-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bs-primary);
+  display: inline-block;
+  animation: dd-pulse 1.2s ease-in-out infinite;
+}
+@keyframes dd-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+/* ---- Fresh / changed order highlight (staff queues) --------------------- */
+.dd-flash {
+  animation: dd-flash 3s ease-out 1;
+}
+@keyframes dd-flash {
+  0% {
+    box-shadow:
+      0 0 0 3px var(--bs-primary),
+      0 0 0 0 rgba(var(--bs-primary-rgb, 217, 72, 15), 0.45);
+  }
+  12% {
+    box-shadow:
+      0 0 0 3px var(--bs-primary),
+      0 0 0 10px rgba(var(--bs-primary-rgb, 217, 72, 15), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ---- Monthly report bar chart ------------------------------------------- */
+.dd-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 150px;
+  padding-bottom: 16px;
+}
+.dd-bar-col {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.dd-bar {
+  width: 100%;
+  max-width: 16px;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.2s;
+}
+.dd-bar-col:hover .dd-bar {
+  filter: brightness(0.9);
+}
+.dd-bar-lbl {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #adb5bd;
+}
+.dd-legend {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* ---- JS-free modal (custom backdrop around Bootstrap .modal-content) ----- */
+.dd-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.dd-modal-backdrop .modal-dialog {
+  margin: 0;
+  width: 460px;
+  max-width: 100%;
+}
+.dd-modal-backdrop .modal-content {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.3);
 }

@@ -6,3 +6,4 @@ export { MenuItem, type MenuItemDoc } from './menu-item';
 export { QrSource, type QrSourceDoc } from './qr-source';
 export { Order, type OrderDoc, type OrderItemDoc } from './order';
 export { Counter, type CounterDoc } from './counter';
+export { Session, type SessionDoc } from './session';

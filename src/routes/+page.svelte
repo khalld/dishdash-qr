@@ -1,37 +1,42 @@
 <script lang="ts">
-  // Public landing page. Clients reach a tenant by scanning a QR (→ /menu/[qrToken]);
-  // staff sign in to their area. This is just an entry point / status page.
+  // Public landing page. Clients reach a tenant by scanning a physical QR
+  // (→ /menu/[qrToken]); staff sign in to their area from here.
 </script>
 
-<main class="container py-5">
-  <div class="text-center mx-auto" style="max-width: 640px;">
-    <h1 class="display-5 fw-bold">DishDash <span class="dd-brand">QR</span></h1>
-    <p class="lead text-secondary">
-      Ordina dal tuo tavolo scansionando il QR del locale. Nessuna registrazione: scegli un nickname
-      e segui la tua comanda.
-    </p>
+<svelte:head>
+  <title>DishDash QR</title>
+</svelte:head>
 
-    <div class="row g-3 mt-4 text-start">
-      <div class="col-12 col-md-6">
-        <div class="card h-100">
-          <div class="card-body">
-            <h2 class="h5 card-title">Sei un cliente?</h2>
-            <p class="card-text text-secondary mb-0">
-              Inquadra il QR code sul tavolo o al banco per aprire il menu del locale.
-            </p>
-          </div>
+<main class="container py-5">
+  <div class="mx-auto" style="max-width: 640px;">
+    <div class="text-center mb-4">
+      <h1 class="display-5 fw-bold">DishDash <span class="dd-brand">QR</span></h1>
+      <p class="lead text-secondary mb-0">
+        Ordina dal tuo tavolo scansionando il QR del locale. Nessuna registrazione: scegli un
+        nickname e segui la tua comanda.
+      </p>
+    </div>
+
+    <div class="d-flex flex-column gap-3">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="h5 card-title mb-1">Sei un cliente?</h2>
+          <p class="card-text text-secondary mb-0">
+            Inquadra il QR code sul tavolo o al banco per aprire il menu del locale.
+          </p>
         </div>
       </div>
-      <div class="col-12 col-md-6">
-        <div class="card h-100">
-          <div class="card-body">
-            <h2 class="h5 card-title">Sei dello staff?</h2>
-            <p class="card-text text-secondary mb-0">
-              Gestore e lavoratore accedono con le proprie credenziali. (Login — milestone M1.)
-            </p>
-          </div>
+      <div class="card">
+        <div class="card-body">
+          <h2 class="h5 card-title mb-1">Sei dello staff?</h2>
+          <p class="card-text text-secondary mb-3">
+            Gestore e lavoratore accedono dal pannello staff con le proprie credenziali.
+          </p>
+          <a class="btn btn-primary" href="/login">Accedi al pannello staff</a>
         </div>
       </div>
     </div>
+
+    <p class="text-center text-secondary small mt-4 mb-0">Pagamento in contanti alla consegna</p>
   </div>
 </main>

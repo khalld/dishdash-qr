@@ -52,3 +52,47 @@ export const createStaffSchema = z.object({
   role: z.enum(STAFF_ROLES).refine((r) => r !== 'superuser', 'Ruolo non creabile')
 });
 export type CreateStaffInput = z.infer<typeof createStaffSchema>;
+
+// Provisioning (no password fields: initial passwords are generated server-side
+// and shown once). A username is lowercased and restricted to a safe charset.
+const usernameField = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3, 'Username troppo corto')
+  .max(40)
+  .regex(/^[a-z0-9._-]+$/, 'Solo lettere, numeri, punto, trattino e underscore');
+
+export const createTenantSchema = z.object({
+  name: z.string().trim().min(1, 'Nome obbligatorio').max(120)
+});
+export type CreateTenantInput = z.infer<typeof createTenantSchema>;
+
+// Superuser: create a gestore/lavoratore and assign to a chosen tenant.
+export const provisionStaffSchema = z.object({
+  username: usernameField,
+  tenantId: z.string().min(1, 'Tenant obbligatorio')
+});
+export type ProvisionStaffInput = z.infer<typeof provisionStaffSchema>;
+
+// Gestore: create a lavoratore of the OWN tenant (tenant comes from the session).
+export const createWorkerSchema = z.object({
+  username: usernameField
+});
+export type CreateWorkerInput = z.infer<typeof createWorkerSchema>;
+
+// Manager menu item creation from the modal (price arrives as a decimal string
+// like "5,00" and is parsed to integer cents before this schema validates).
+export const createMenuItemSchema = z.object({
+  name: z.string().trim().min(1, 'Nome obbligatorio').max(120),
+  description: z.string().trim().max(500).default(''),
+  category: z.string().trim().min(1).max(60),
+  price: z.number().int().min(1, 'Prezzo non valido') // cents
+});
+export type CreateMenuItemInput = z.infer<typeof createMenuItemSchema>;
+
+// Manager QR generation.
+export const createQrSchema = z.object({
+  label: z.string().trim().min(1).max(60),
+  type: z.enum(QR_SOURCE_TYPES).default('table')
+});

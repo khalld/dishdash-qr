@@ -1,5 +1,6 @@
-<h1 class="h3 mb-3">Area gestore</h1>
-<p class="text-secondary">
-  Coda comande, menu e disponibilità, generazione QR, lavoratori del tenant, riepiloghi. Usa la
-  barra in alto.
-</p>
+<script lang="ts">
+  // /gestore redirects to /gestore/coda in +page.server.ts; this is only a
+  // fallback if the redirect is ever bypassed.
+</script>
+
+<p class="text-secondary">Reindirizzamento…</p>

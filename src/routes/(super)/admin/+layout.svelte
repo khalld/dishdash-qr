@@ -1,22 +1,19 @@
 <script lang="ts">
   import type { LayoutData } from './$types';
   import type { Snippet } from 'svelte';
+  import AdminNavbar from '$lib/components/AdminNavbar.svelte';
 
   let { data, children }: { data: LayoutData; children: Snippet } = $props();
+
+  const tabs = [
+    { label: 'Tenant', href: '/admin/tenants' },
+    { label: 'Gestori', href: '/admin/gestori' },
+    { label: 'Lavoratori', href: '/admin/lavoratori' }
+  ];
 </script>
 
-<nav class="navbar navbar-expand bg-dark border-bottom border-body" data-bs-theme="dark">
-  <div class="container">
-    <span class="navbar-brand">DishDash · <span class="dd-brand">Superuser</span></span>
-    <ul class="navbar-nav me-auto">
-      <li class="nav-item"><a class="nav-link" href="/admin/tenants">Tenant</a></li>
-      <li class="nav-item"><a class="nav-link" href="/admin/gestori">Gestori</a></li>
-      <li class="nav-item"><a class="nav-link" href="/admin/lavoratori">Lavoratori</a></li>
-    </ul>
-    <span class="navbar-text">{data.user.username}</span>
-  </div>
-</nav>
+<AdminNavbar {tabs} user={data.user.username} />
 
-<main class="container py-4">
+<main class="container-fluid px-3 px-lg-4 py-4">
   {@render children()}
 </main>
