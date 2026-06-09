@@ -7,7 +7,11 @@ import { connectDb } from '$lib/server/db';
 import { Order, MenuItem, type OrderDoc, type OrderItemDoc } from '$lib/server/models';
 import { assertTransition } from '$lib/server/domain/order-state';
 import { nextOrderNumber } from '$lib/server/domain/numbering';
-import { toOrderView } from '$lib/server/repositories/order-repository';
+import {
+  placeOrder,
+  toOrderView,
+  type PlaceOrderInput
+} from '$lib/server/repositories/order-repository';
 import type { Actor, OrderStatus, OrderView } from '$lib/types';
 
 interface TransitionInput {
@@ -57,6 +61,27 @@ export async function transitionOrder({
   if (to === 'CONFERMATA') await decrementStock(tenantId, current.items);
 
   return toOrderView(updated as OrderDoc & { _id: unknown });
+}
+
+/**
+ * Waiter (cameriere) order: create the order and immediately confirm it as the
+ * cameriere, so it skips the gestore pending queue and lands straight in the
+ * worker queue (CONFERMATA, with its daily number). Prices/availability are
+ * recomputed server-side by placeOrder; numbering + stock decrement happen in
+ * transitionOrder. Idempotent: a duplicate submit returns the already-created
+ * order without confirming twice.
+ */
+export async function placeWaiterOrder(input: PlaceOrderInput): Promise<OrderView> {
+  const created = await placeOrder(input);
+  // If a duplicate submission returned an order already past IN_ATTESA, the
+  // confirmation already happened — return it as-is (don't reapply).
+  if (created.status !== 'IN_ATTESA') return created;
+  return transitionOrder({
+    orderId: created.id,
+    tenantId: input.tenantId,
+    to: 'CONFERMATA',
+    actor: 'cameriere'
+  });
 }
 
 /**

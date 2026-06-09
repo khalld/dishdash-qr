@@ -83,5 +83,7 @@ jobs:
           GESTORE_PASSWORD: ${{ secrets.GESTORE_PASSWORD }}
           LAVORATORE_USERNAME: ${{ secrets.LAVORATORE_USERNAME }}
           LAVORATORE_PASSWORD: ${{ secrets.LAVORATORE_PASSWORD }}
+          CAMERIERE_USERNAME: ${{ secrets.CAMERIERE_USERNAME }}
+          CAMERIERE_PASSWORD: ${{ secrets.CAMERIERE_PASSWORD }}
           BOOTSTRAP_TENANT_NAME: ${{ secrets.BOOTSTRAP_TENANT_NAME }}
         run: npm run create-superuser

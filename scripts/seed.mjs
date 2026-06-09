@@ -34,6 +34,7 @@ const tenantSchema = new mongoose.Schema(
     name: { type: String, required: true, unique: true, trim: true },
     logoUrl: { type: String, default: null },
     active: { type: Boolean, default: true },
+    waiterOrdering: { type: Boolean, default: false },
     settings: { type: Object, default: {} }
   },
   { timestamps: true }
@@ -41,7 +42,11 @@ const tenantSchema = new mongoose.Schema(
 
 const staffUserSchema = new mongoose.Schema(
   {
-    role: { type: String, enum: ['superuser', 'gestore', 'lavoratore'], required: true },
+    role: {
+      type: String,
+      enum: ['superuser', 'gestore', 'lavoratore', 'cameriere'],
+      required: true
+    },
     tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', default: null },
     username: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
@@ -163,7 +168,8 @@ async function seed() {
   console.log('\n👤  Staff del tenant…');
   const staff = [
     { username: 'gestore', role: 'gestore' },
-    { username: 'lavoratore', role: 'lavoratore' }
+    { username: 'lavoratore', role: 'lavoratore' },
+    { username: 'cameriere', role: 'cameriere' }
   ];
   for (const s of staff) {
     const result = await StaffUser.findOneAndUpdate(
@@ -213,8 +219,12 @@ async function seed() {
   );
   console.log(`│ Gestore      │ gestore      │ ${DEMO_PASSWORD.padEnd(8)} │`);
   console.log(`│ Lavoratore   │ lavoratore   │ ${DEMO_PASSWORD.padEnd(8)} │`);
+  console.log(`│ Cameriere    │ cameriere    │ ${DEMO_PASSWORD.padEnd(8)} │`);
   console.log('└──────────────┴──────────────┴──────────┘');
   console.log(`\nTenant demo: "${tenant.name}". I clienti ordinano via QR (nessun login).`);
+  console.log(
+    'Modalità cameriere: flag per-tenant (default OFF). Attivala da gestore/superuser per provare il flusso del cameriere.'
+  );
 
   await mongoose.disconnect();
 }

@@ -13,8 +13,10 @@ export interface TenantView {
   name: string;
   logoUrl: string | null;
   active: boolean;
+  waiterOrdering: boolean; // waiter-ordering mode flag (CLAUDE.md §3)
   gestore: string; // gestore username, or "—" when none assigned yet
   workers: number;
+  camerieri: number;
 }
 
 export interface StaffRow {
@@ -31,17 +33,20 @@ export async function listTenants(): Promise<TenantView[]> {
   return Promise.all(
     tenants.map(async (t) => {
       const id = String((t as TenantDoc & { _id: unknown })._id);
-      const [gestore, workers] = await Promise.all([
+      const [gestore, workers, camerieri] = await Promise.all([
         StaffUser.findOne({ tenantId: id, role: 'gestore' }).lean<StaffUserDoc>(),
-        StaffUser.countDocuments({ tenantId: id, role: 'lavoratore' })
+        StaffUser.countDocuments({ tenantId: id, role: 'lavoratore' }),
+        StaffUser.countDocuments({ tenantId: id, role: 'cameriere' })
       ]);
       return {
         id,
         name: t.name,
         logoUrl: t.logoUrl ?? null,
         active: t.active,
+        waiterOrdering: t.waiterOrdering ?? false,
         gestore: gestore?.username ?? '—',
-        workers
+        workers,
+        camerieri
       };
     })
   );
@@ -80,8 +85,18 @@ export async function listGestori(): Promise<StaffRow[]> {
 
 /** Lavoratori, optionally scoped to one tenant (a gestore sees only its own). */
 export async function listLavoratori(tenantId?: string): Promise<StaffRow[]> {
+  return listStaffByRole('lavoratore', tenantId);
+}
+
+/** Camerieri, optionally scoped to one tenant (a gestore sees only its own). */
+export async function listCamerieri(tenantId?: string): Promise<StaffRow[]> {
+  return listStaffByRole('cameriere', tenantId);
+}
+
+/** Staff of a given role, optionally scoped to one tenant. */
+async function listStaffByRole(role: StaffRole, tenantId?: string): Promise<StaffRow[]> {
   await connectDb();
-  const filter: Record<string, unknown> = { role: 'lavoratore' };
+  const filter: Record<string, unknown> = { role };
   if (tenantId) filter.tenantId = tenantId;
   const users = await StaffUser.find(filter).sort({ username: 1 }).lean<StaffUserDoc[]>();
   const tenants = await listTenantOptions();
@@ -128,18 +143,18 @@ export async function createStaffUser(input: {
 
 /**
  * Reset a staff account's password to a fresh generated value (returned once).
- * Optionally scoped to a tenant so a gestore can only reset its own workers.
- * Returns null when no matching user is found.
+ * Optionally scoped to a (tenant, role) pair so a gestore can only reset its own
+ * staff of a given role. Returns null when no matching user is found.
  */
 export async function resetStaffPassword(
   userId: string,
-  scopeTenantId?: string
+  scope?: { tenantId: string; role: Exclude<StaffRole, 'superuser'> }
 ): Promise<{ username: string; initialPassword: string } | null> {
   await connectDb();
   const filter: Record<string, unknown> = { _id: userId };
-  if (scopeTenantId) {
-    filter.tenantId = scopeTenantId;
-    filter.role = 'lavoratore';
+  if (scope) {
+    filter.tenantId = scope.tenantId;
+    filter.role = scope.role;
   }
   const user = await StaffUser.findOne(filter);
   if (!user) return null;
@@ -147,4 +162,20 @@ export async function resetStaffPassword(
   user.passwordHash = await hashPassword(initialPassword);
   await user.save();
   return { username: user.username, initialPassword };
+}
+
+/**
+ * Flip a tenant's waiter-ordering mode and return the new value. The server
+ * reads the current flag and inverts it, so the client only needs to identify
+ * the tenant — no desired state to spoof (mirrors the menu availability toggle).
+ * Callers must authorize the change: the superuser may flip any tenant, a
+ * gestore only its own (enforced in the route). Returns null if no tenant matched.
+ */
+export async function toggleTenantWaiterOrdering(tenantId: string): Promise<boolean | null> {
+  await connectDb();
+  const tenant = await Tenant.findById(tenantId).lean<TenantDoc>();
+  if (!tenant) return null;
+  const next = !(tenant.waiterOrdering ?? false);
+  await Tenant.updateOne({ _id: tenantId }, { $set: { waiterOrdering: next } });
+  return next;
 }

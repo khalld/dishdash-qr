@@ -29,6 +29,7 @@ function cookieOptions() {
 export function homeForRole(role: StaffRole): string {
   if (role === 'superuser') return '/admin/tenants';
   if (role === 'gestore') return '/gestore/coda';
+  if (role === 'cameriere') return '/cameriere';
   return '/lavoratore';
 }
 

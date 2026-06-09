@@ -55,17 +55,20 @@ Crea l'Environment `production` e aggiungi i secrets:
 - `SUPERUSER_PASSWORD` _(richiesto, ≥8)_, `SUPERUSER_USERNAME` _(opz., default `superadmin`)_.
 - `GESTORE_PASSWORD` _(richiesto, ≥8)_, `GESTORE_USERNAME` _(opz., default `gestore`)_.
 - `LAVORATORE_PASSWORD` _(richiesto, ≥8)_, `LAVORATORE_USERNAME` _(opz., default `lavoratore`)_.
+- `CAMERIERE_PASSWORD` _(richiesto, ≥8)_, `CAMERIERE_USERNAME` _(opz., default `cameriere`)_.
 - `BOOTSTRAP_TENANT_NAME` _(opz., default `Pub del Centro`)_ — nome del tenant a
-  cui legare gestore e lavoratore; **creato automaticamente se assente**.
+  cui legare gestore, lavoratore e cameriere; **creato automaticamente se assente**.
 
 > Il job `bootstrap-superuser` esegue `npm run create-superuser` contro il DB di
 > produzione dopo ogni deploy. È idempotente e provisiona in un colpo solo: il
-> tenant `BOOTSTRAP_TENANT_NAME` (creato se manca) e i **tre** account —
-> superuser (globale), gestore e lavoratore — creandoli se mancano o
+> tenant `BOOTSTRAP_TENANT_NAME` (creato se manca) e i **quattro** account —
+> superuser (globale), gestore, lavoratore e cameriere — creandoli se mancano o
 > reimpostandone la password. Nessun passo separato di provisioning del tenant:
 > un DB vuoto è sufficiente. Il tenant auto-creato è una convenienza di
 > bootstrap; a runtime la creazione dei tenant resta prerogativa del superuser
-> (§3).
+> (§3). La **modalità cameriere** è un flag per-tenant (default OFF) attivato
+> in-app da gestore o superuser: l'account cameriere viene creato qui, ma resta
+> inattivo finché il flag non viene acceso per il tenant.
 
 ## Deploy
 

@@ -10,6 +10,7 @@
     { label: 'Menu', href: '/gestore/menu' },
     { label: 'QR code', href: '/gestore/qrcodes' },
     { label: 'Lavoratori', href: '/gestore/lavoratori' },
+    { label: 'Camerieri', href: '/gestore/camerieri' },
     { label: 'Report', href: '/gestore/report' }
   ];
 </script>

@@ -28,6 +28,18 @@ export const createOrderSchema = z.object({
 });
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 
+// Waiter (cameriere) order: the tenant comes from the staff session, not the QR
+// token, and the source is one of the tenant's own QR sources (resolved/labelled
+// server-side). The nickname is optional — it falls back to the source label.
+// Prices are recomputed server-side exactly like the self-order flow (CLAUDE.md §8).
+export const waiterPlaceOrderSchema = z.object({
+  qrSourceId: z.string().min(1, 'Seleziona un tavolo o punto di ritiro'),
+  nickname: z.string().trim().max(40).default(''),
+  items: z.array(orderLineInputSchema).min(1, 'Aggiungi almeno un articolo'),
+  idempotencyKey: z.string().min(8).max(128)
+});
+export type WaiterPlaceOrderInput = z.infer<typeof waiterPlaceOrderSchema>;
+
 export const menuItemSchema = z.object({
   name: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500).default(''),
@@ -44,8 +56,9 @@ export const qrSourceSchema = z.object({
 });
 export type QrSourceInput = z.infer<typeof qrSourceSchema>;
 
-// Superuser creates staff; gestore may only create lavoratori of its tenant
-// (enforced in the route, not here). 'superuser' is excluded as a creatable role.
+// Superuser creates staff; gestore may only create lavoratori/camerieri of its
+// tenant (enforced in the route, not here). 'superuser' is excluded as a
+// creatable role.
 export const createStaffSchema = z.object({
   username: z.string().trim().min(3).max(40).toLowerCase(),
   password: z.string().min(8).max(128),

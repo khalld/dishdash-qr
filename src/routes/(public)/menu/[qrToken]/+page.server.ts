@@ -7,14 +7,20 @@ import { Tenant } from '$lib/server/models';
 import { createOrderSchema } from '$lib/schemas';
 
 // Client menu page. The tenant is derived from the opaque qrToken — never from
-// the client (CLAUDE.md §2). Only available items are shown.
+// the client (CLAUDE.md §2). Only available items are shown. When the tenant runs
+// in waiter-ordering mode the menu is VIEW-ONLY: a cameriere takes the order, so
+// the page hides the cart and the `place` action is refused (CLAUDE.md §3).
 export const load: PageServerLoad = async ({ params }) => {
   const { tenantId, qrSource } = await resolveTenantFromQr(params.qrToken);
   const tenant = await Tenant.findById(tenantId).lean();
   const menu = await listAvailableMenu(tenantId);
 
   return {
-    tenant: { name: tenant?.name ?? '', logoUrl: tenant?.logoUrl ?? null },
+    tenant: {
+      name: tenant?.name ?? '',
+      logoUrl: tenant?.logoUrl ?? null,
+      waiterOrdering: tenant?.waiterOrdering ?? false
+    },
     qrSource,
     menu
   };
@@ -45,6 +51,14 @@ export const actions: Actions = {
     }
 
     const { tenantId, qrSource } = await resolveTenantFromQr(parsed.data.qrToken);
+
+    // Waiter-ordering tenants don't accept self-orders — a cameriere places them.
+    // Enforced server-side regardless of what the client renders (CLAUDE.md §3, §8).
+    const tenant = await Tenant.findById(tenantId).lean();
+    if (tenant?.waiterOrdering) {
+      return fail(403, { error: 'In questo locale l’ordine viene preso da un cameriere.' });
+    }
+
     const order = await placeOrder({
       tenantId,
       qrSourceId: qrSource.id,

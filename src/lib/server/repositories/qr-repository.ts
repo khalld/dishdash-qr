@@ -31,6 +31,30 @@ export async function listQrSources(tenantId: string): Promise<QrSourceView[]> {
   return docs.map((d) => toView(d as QrSourceDoc & { _id: unknown }));
 }
 
+/** Active QR sources for a tenant — the table/pickup picker a cameriere uses. */
+export async function listActiveQrSources(tenantId: string): Promise<QrSourceView[]> {
+  await connectDb();
+  const docs = await QrSource.find({ tenantId, active: true })
+    .sort({ createdAt: 1 })
+    .lean<QrSourceDoc[]>();
+  return docs.map((d) => toView(d as QrSourceDoc & { _id: unknown }));
+}
+
+/**
+ * Resolve one active QR source by id, scoped to the tenant. Returns its id +
+ * label so the cameriere order flow can snapshot a server-trusted label instead
+ * of one supplied by the client. Returns null if not found/inactive.
+ */
+export async function getActiveQrSource(
+  tenantId: string,
+  id: string
+): Promise<{ id: string; label: string } | null> {
+  await connectDb();
+  const doc = await QrSource.findOne({ _id: id, tenantId, active: true }).lean<QrSourceDoc>();
+  if (!doc) return null;
+  return { id: String((doc as QrSourceDoc & { _id: unknown })._id), label: doc.label };
+}
+
 /** Create a labelled QR source with a fresh opaque token. */
 export async function createQrSource(
   tenantId: string,

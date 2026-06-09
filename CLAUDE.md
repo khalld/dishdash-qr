@@ -44,10 +44,12 @@ non si autentica.
 - **Superuser** (lo sviluppatore che configura il sistema): ruolo globale.
   - crea tenant;
   - crea gestori e li assegna a uno specifico tenant;
-  - crea lavoratori;
-  - assegna un logo a un tenant.
+  - crea lavoratori e camerieri;
+  - assegna un logo a un tenant;
+  - attiva/disattiva la **modalità cameriere** di un tenant.
 - **Gestore** (un tenant): opera solo dentro il proprio tenant.
-  - crea utenze per i lavoratori del proprio tenant;
+  - crea utenze per i lavoratori e i camerieri del proprio tenant;
+  - attiva/disattiva la **modalità cameriere** del proprio tenant;
   - configura il menu (CRUD, quantità, disponibilità a runtime);
   - genera N QR code etichettati (tavolo X, carrello, asporto…);
   - visualizza una pagina di riepilogo giornaliero/mensile;
@@ -55,14 +57,26 @@ non si autentica.
 - **Lavoratore** (un tenant): può solo accedere e vedere le comande confermate dal
   gestore, prenderle in carico, marcarle pronte/consegnate. Nessuna gestione di
   menu o utenze.
+- **Cameriere** (un tenant): attivo nei tenant con **modalità cameriere** accesa.
+  Vede il menu del tenant, compone una comanda per il cliente scegliendo il
+  tavolo/punto di ritiro e la **conferma**: la comanda salta la coda di attesa del
+  gestore ed entra direttamente nella coda dei lavoratori (`CONFERMATA`, con
+  numero). Nessuna gestione di menu o utenze.
 - **Cliente** (anonimo, legato a un tenant via QR): scansiona il QR, ordina con un
-  nickname, traccia la propria comanda. Nessuna registrazione.
+  nickname, traccia la propria comanda. Nessuna registrazione. **Nei tenant in
+  modalità cameriere il cliente vede il menu in sola lettura** e l'ordine lo prende
+  un cameriere.
 
-Nota: sia il superuser sia il gestore possono creare lavoratori; il superuser è
-cross-tenant, il gestore solo nel proprio tenant. **La creazione dei gestori è
-prerogativa esclusiva del superuser: il gestore non può creare altri gestori.** Il
-superuser iniziale è provisionato fuori dall'app (seed), non registrabile
-dall'esterno.
+Nota: sia il superuser sia il gestore possono creare lavoratori e camerieri; il
+superuser è cross-tenant, il gestore solo nel proprio tenant. **La creazione dei
+gestori è prerogativa esclusiva del superuser: il gestore non può creare altri
+gestori.** Il superuser iniziale è provisionato fuori dall'app (seed), non
+registrabile dall'esterno.
+
+**Modalità cameriere (flag per-tenant).** Ogni tenant ha un flag `waiterOrdering`
+(default `false`). Quando è attivo, l'auto-ordine del cliente è disabilitato (menu
+in sola lettura via QR) e le comande le prende un cameriere. Il flag è gestito sia
+dal superuser (scheda tenant) sia dal gestore (proprio pannello).
 
 ## 4. Stack tecnologico
 
@@ -116,17 +130,20 @@ src/
       ordine/[trackToken]/ # cliente: tracciamento stato comanda
     (super)/
       admin/               # superuser (protetta, globale)
-        tenants/           #   CRUD tenant + logo
+        tenants/           #   CRUD tenant + logo + toggle modalità cameriere
         gestori/           #   crea gestori e li assegna a un tenant
         lavoratori/        #   crea lavoratori
+        camerieri/         #   crea camerieri
     (staff)/
       gestore/             # area gestore (protetta, scoped al tenant)
         menu/              #   CRUD menu, disponibilità runtime
         qrcodes/           #   generazione/gestione QR
         coda/              #   coda virtuale: conferma/annulla
         lavoratori/        #   crea utenze lavoratore del proprio tenant
+        camerieri/         #   crea camerieri + toggle modalità cameriere
         report/            #   riepilogo giornaliero/mensile
       lavoratore/          # area lavoratore (protetta, scoped al tenant)
+      cameriere/           # area cameriere (protetta, scoped al tenant)
     api/ (o +server.ts)    # endpoint: ordini, SSE, ecc.
   lib/
     server/
@@ -147,9 +164,11 @@ src/
 Entità principali (dettaglio in `docs/specifica-funzionale.md`). Tutte le entità
 operative portano `tenantId`.
 
-- `Tenant`: nome, `logoUrl`, impostazioni, attivo.
-- `StaffUser`: ruolo (`superuser` | `gestore` | `lavoratore`); `tenantId` per
-  gestore e lavoratore, assente per il superuser (globale).
+- `Tenant`: nome, `logoUrl`, `waiterOrdering` (flag modalità cameriere, default
+  `false`), impostazioni, attivo.
+- `StaffUser`: ruolo (`superuser` | `gestore` | `lavoratore` | `cameriere`);
+  `tenantId` per gestore, lavoratore e cameriere, assente per il superuser
+  (globale).
 - `MenuItem`: `tenantId`, nome, descrizione, prezzo, categoria, `available`
   (toggle runtime), `stock` opzionale.
 - `QrSource`: `tenantId`, token, etichetta (es. "Tavolo 5"), tipo
@@ -177,6 +196,10 @@ Regole non negoziabili:
 - Il numero comanda è assegnato una sola volta, alla transizione
   `IN_ATTESA → CONFERMATA`, in modo atomico, **progressivo per tenant e azzerato
   ogni giorno**.
+- Nei tenant in modalità cameriere, la transizione `IN_ATTESA → CONFERMATA` è
+  consentita anche al **cameriere** (oltre al gestore): la comanda viene creata e
+  subito confermata, saltando la coda di attesa del gestore ed entrando diretta
+  nella coda dei lavoratori. Il numero è comunque assegnato da quella transizione.
 
 ## 8. Convenzioni
 
@@ -269,16 +292,18 @@ Dettaglio operativo in `docs/deploy.md`.
      `RENDER_SERVICE_ID` + `RENDER_API_KEY` solo a CI verde.
   3. `bootstrap-superuser` — esegue `npm run create-superuser` (idempotente) per
      garantire gli account staff iniziali in produzione: superuser (globale),
-     gestore e lavoratore. Il superuser è l'account-cardine provisionato fuori
-     dall'app (§3); gestore e lavoratore vengono legati al tenant
+     gestore, lavoratore e cameriere. Il superuser è l'account-cardine provisionato
+     fuori dall'app (§3); gestore, lavoratore e cameriere vengono legati al tenant
      `BOOTSTRAP_TENANT_NAME` (default `Pub del Centro`), **creato dallo script se
-     assente** come convenienza di bootstrap. Vedere `docs/deploy.md`.
+     assente** come convenienza di bootstrap. La modalità cameriere resta un flag
+     per-tenant (default OFF) da attivare in-app. Vedere `docs/deploy.md`.
 - **Immagine Docker**: `Dockerfile` multi-stage (builder → runner, utente non
   root, healthcheck). `.github/workflows/docker-publish.yml` pubblica anche
   l'immagine su GHCR (opzionale rispetto al deploy su Render).
 - **Segreti** (GitHub → Environment `production`): `RENDER_SERVICE_ID`,
   `RENDER_API_KEY`, `MONGODB_URI`, `SUPERUSER_PASSWORD`, `GESTORE_PASSWORD`,
-  `LAVORATORE_PASSWORD` (più gli opzionali `BOOTSTRAP_TENANT_NAME` e gli username
-  `SUPERUSER_USERNAME` / `GESTORE_USERNAME` / `LAVORATORE_USERNAME`).
+  `LAVORATORE_PASSWORD`, `CAMERIERE_PASSWORD` (più gli opzionali
+  `BOOTSTRAP_TENANT_NAME` e gli username `SUPERUSER_USERNAME` / `GESTORE_USERNAME`
+  / `LAVORATORE_USERNAME` / `CAMERIERE_USERNAME`).
   Su Render (dashboard, `sync:false`): `MONGODB_URI`, `ORIGIN`, e le credenziali
   superuser. Nessun segreto è committato.

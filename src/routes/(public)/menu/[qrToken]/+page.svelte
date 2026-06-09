@@ -25,6 +25,10 @@
   const total = $derived(cart.reduce((s, i) => s + i.price * i.qty, 0));
   const canSend = $derived(nickname.trim().length > 0 && count > 0);
 
+  // Waiter-ordering tenants: the menu is view-only and a cameriere takes the
+  // order (CLAUDE.md §3). The server also refuses the `place` action in this mode.
+  const readOnly = $derived(data.tenant.waiterOrdering);
+
   // Serialized for the hidden form field consumed by the `place` action.
   const itemsJson = $derived(
     JSON.stringify(cart.map((i) => ({ menuItemId: i.id, qty: i.qty, notes: '' })))
@@ -59,7 +63,7 @@
         </div>
       </div>
     </div>
-    {#if screen === 'menu' && count > 0}
+    {#if !readOnly && screen === 'menu' && count > 0}
       <span class="badge rounded-pill text-bg-secondary">{count} nel carrello</span>
     {/if}
   </div>
@@ -67,6 +71,18 @@
 
 <main class="container py-3 pb-5" style="max-width: 720px;">
   {#if screen === 'menu'}
+    {#if readOnly}
+      <div class="alert alert-info d-flex align-items-start gap-2 mt-3" role="alert">
+        <span aria-hidden="true">🛎️</span>
+        <div>
+          <div class="fw-semibold">Per ordinare, chiama un cameriere</div>
+          <div class="small">
+            Questo è il menu di {data.tenant.name}. La comanda viene presa al tavolo dal personale.
+            Pagamento in contanti alla consegna.
+          </div>
+        </div>
+      </div>
+    {/if}
     {#if data.menu.length === 0}
       <p class="text-secondary py-4">Nessun elemento disponibile al momento.</p>
     {:else}
@@ -89,7 +105,9 @@
                 </div>
                 <div class="d-flex align-items-center gap-2">
                   <span class="text-nowrap">{formatEuros(item.price)}</span>
-                  <QtyStepper value={qty[item.id] ?? 0} onChange={(v) => setItem(item.id, v)} />
+                  {#if !readOnly}
+                    <QtyStepper value={qty[item.id] ?? 0} onChange={(v) => setItem(item.id, v)} />
+                  {/if}
                 </div>
               </li>
             {/each}
@@ -97,20 +115,22 @@
         </div>
       {/each}
 
-      <!-- Sticky cart bar -->
-      <div
-        class="position-sticky bottom-0 bg-white border-top py-2"
-        style="box-shadow: 0 -.125rem .5rem rgba(0,0,0,.05);"
-      >
-        <button
-          class="btn btn-primary w-100 d-flex justify-content-between align-items-center"
-          disabled={count === 0}
-          onclick={() => (screen = 'confirm')}
+      <!-- Sticky cart bar (self-order only) -->
+      {#if !readOnly}
+        <div
+          class="position-sticky bottom-0 bg-white border-top py-2"
+          style="box-shadow: 0 -.125rem .5rem rgba(0,0,0,.05);"
         >
-          <span>Vai al carrello{count > 0 ? ` · ${count}` : ''}</span>
-          <span class="fw-semibold">{formatEuros(total)}</span>
-        </button>
-      </div>
+          <button
+            class="btn btn-primary w-100 d-flex justify-content-between align-items-center"
+            disabled={count === 0}
+            onclick={() => (screen = 'confirm')}
+          >
+            <span>Vai al carrello{count > 0 ? ` · ${count}` : ''}</span>
+            <span class="fw-semibold">{formatEuros(total)}</span>
+          </button>
+        </div>
+      {/if}
     {/if}
   {:else}
     <button

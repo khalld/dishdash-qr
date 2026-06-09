@@ -6,9 +6,12 @@
  * public registration (there is none — see CLAUDE.md §3):
  *   - superuser  : global, cross-tenant StaffUser (role "superuser", tenantId null);
  *   - gestore    : tenant-scoped manager of an EXISTING tenant;
- *   - lavoratore : tenant-scoped worker of the same tenant.
+ *   - lavoratore : tenant-scoped worker of the same tenant;
+ *   - cameriere  : tenant-scoped waiter of the same tenant (takes orders for guests
+ *                  in waiter-ordering tenants). The account is provisioned here, but
+ *                  waiter-ordering mode itself is a per-tenant flag toggled in-app.
  *
- * The gestore and lavoratore are attached to the tenant named
+ * The gestore, lavoratore and cameriere are attached to the tenant named
  * BOOTSTRAP_TENANT_NAME (default "Pub del Centro"). The tenant is created if it
  * does not exist yet, so a fresh deploy is self-sufficient and needs no separate
  * tenant provisioning step. NOTE: this is a bootstrap convenience only — at
@@ -26,6 +29,8 @@
  *   GESTORE_PASSWORD      (required, min 8 chars)
  *   LAVORATORE_USERNAME   (optional, default: "lavoratore")
  *   LAVORATORE_PASSWORD   (required, min 8 chars)
+ *   CAMERIERE_USERNAME    (optional, default: "cameriere")
+ *   CAMERIERE_PASSWORD    (required, min 8 chars)
  *   BOOTSTRAP_TENANT_NAME (optional, default: "Pub del Centro" — created if missing)
  *
  * CLI override for the superuser (handy for a one-off local bootstrap):
@@ -57,6 +62,9 @@ const gestorePassword = process.env.GESTORE_PASSWORD;
 const lavoratoreUsername = (process.env.LAVORATORE_USERNAME || 'lavoratore').toLowerCase().trim();
 const lavoratorePassword = process.env.LAVORATORE_PASSWORD;
 
+const cameriereUsername = (process.env.CAMERIERE_USERNAME || 'cameriere').toLowerCase().trim();
+const camerierePassword = process.env.CAMERIERE_PASSWORD;
+
 // Tenant the gestore/lavoratore are attached to. Created on the fly if missing
 // (see run()), so it falls back to a sensible default instead of being required.
 const DEFAULT_TENANT_NAME = 'Pub del Centro';
@@ -81,6 +89,7 @@ requirePassword(
 );
 requirePassword(gestorePassword, 'GESTORE_PASSWORD');
 requirePassword(lavoratorePassword, 'LAVORATORE_PASSWORD');
+requirePassword(camerierePassword, 'CAMERIERE_PASSWORD');
 
 // Schemas mirror src/lib/server/models to keep the script self-contained.
 // The superuser is global (tenantId null); gestore/lavoratore carry a tenantId.
@@ -88,7 +97,7 @@ const staffUserSchema = new mongoose.Schema(
   {
     role: {
       type: String,
-      enum: ['superuser', 'gestore', 'lavoratore'],
+      enum: ['superuser', 'gestore', 'lavoratore', 'cameriere'],
       required: true
     },
     tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', default: null },
@@ -104,6 +113,7 @@ const tenantSchema = new mongoose.Schema(
     name: { type: String, required: true, unique: true, trim: true },
     logoUrl: { type: String, default: null },
     active: { type: Boolean, default: true },
+    waiterOrdering: { type: Boolean, default: false },
     settings: { type: Object, default: {} }
   },
   { timestamps: true }
@@ -179,6 +189,18 @@ async function run() {
   });
   report('🧑‍🍳 ', 'Lavoratore', lavoratore);
 
+  const cameriere = await upsertStaffUser({
+    username: cameriereUsername,
+    role: 'cameriere',
+    tenantId: tenant._id,
+    password: camerierePassword
+  });
+  report('🛎️ ', 'Cameriere', cameriere);
+
+  console.log(
+    '\nℹ️   Nota: la "modalità cameriere" è un flag per-tenant (default OFF). Attivala dal'
+  );
+  console.log('    pannello gestore o superuser per usare il cameriere appena creato.');
   console.log('\nOra puoi accedere dalla pagina di login dello staff.');
   await mongoose.disconnect();
 }
