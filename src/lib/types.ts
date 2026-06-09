@@ -15,7 +15,10 @@ export const ORDER_STATUSES = [
 ] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
-export const STAFF_ROLES = ['superuser', 'gestore', 'lavoratore'] as const;
+// 'cameriere' (waiter) is tenant-scoped like 'lavoratore': in tenants with
+// waiter ordering enabled it takes orders for guests and confirms them (see
+// CLAUDE.md §3). Appended last so existing role indexes are unaffected.
+export const STAFF_ROLES = ['superuser', 'gestore', 'lavoratore', 'cameriere'] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
 // Who can trigger an order transition. The anonymous client is not a StaffRole.

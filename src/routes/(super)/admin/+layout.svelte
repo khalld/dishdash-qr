@@ -8,7 +8,8 @@
   const tabs = [
     { label: 'Tenant', href: '/admin/tenants' },
     { label: 'Gestori', href: '/admin/gestori' },
-    { label: 'Lavoratori', href: '/admin/lavoratori' }
+    { label: 'Lavoratori', href: '/admin/lavoratori' },
+    { label: 'Camerieri', href: '/admin/camerieri' }
   ];
 </script>
 

@@ -67,6 +67,9 @@
         <a class="nav-link" href="#staff"
           ><span class="t-it">Per lo staff</span><span class="t-en">For staff</span></a
         >
+        <a class="nav-link" href="#cameriere"
+          ><span class="t-it">Cameriere</span><span class="t-en">Waiter mode</span></a
+        >
         <a class="nav-link" href="#report"
           ><span class="t-it">Report</span><span class="t-en">Reports</span></a
         >
@@ -86,8 +89,8 @@
           onclick={() => (lang = 'en')}>EN</button
         >
       </div>
-      <a href="#contatti" class="btn btn-primary btn-sm d-none d-sm-inline-flex">
-        <span class="t-it">Richiedi una demo</span><span class="t-en">Book a demo</span>
+      <a href="/" class="btn btn-primary btn-sm d-none d-sm-inline-flex">
+        <span class="t-it">Vai all'app</span><span class="t-en">Open the app</span>
       </a>
     </div>
   </header>
@@ -118,8 +121,8 @@
             >
           </p>
           <div class="d-flex flex-wrap gap-2 mb-4">
-            <a href="#contatti" class="btn btn-primary btn-lg"
-              ><span class="t-it">Richiedi una demo</span><span class="t-en">Book a demo</span></a
+            <a href="/" class="btn btn-primary btn-lg"
+              ><span class="t-it">Vai all'app</span><span class="t-en">Open the app</span></a
             >
             <a href="#come-funziona" class="btn btn-outline-secondary btn-lg"
               ><span class="t-it">Guarda come funziona</span><span class="t-en"
@@ -1022,6 +1025,206 @@
     </div>
   </section>
 
+  <!-- ============================ MODALITÀ CAMERIERE ============================ -->
+  <section class="sec anchor-offset" id="cameriere">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-lg-8">
+          <div class="eyebrow mb-2">
+            <span class="t-it">Opzione per locale</span><span class="t-en">Per-venue option</span>
+          </div>
+          <h2 class="display-tight h1 mb-3">
+            <span class="t-it">Preferisci la comanda al tavolo? Attiva la modalità cameriere</span
+            ><span class="t-en">Prefer table service? Switch on waiter mode</span>
+          </h2>
+          <p class="lede">
+            <span class="t-it"
+              >Un interruttore per ogni locale. Con la modalità cameriere attiva, il cliente
+              inquadra il QR e vede il menu in sola lettura: a prendere e confermare la comanda è il
+              cameriere. Il resto del flusso resta identico.</span
+            ><span class="t-en"
+              >One switch per venue. With waiter mode on, the guest scans the QR and sees a
+              read-only menu: a waiter takes and confirms the order. The rest of the flow stays the
+              same.</span
+            >
+          </p>
+        </div>
+      </div>
+
+      <div class="row align-items-center g-4 justify-content-center">
+        <!-- phone: read-only menu -->
+        <div class="col-auto text-center">
+          <div class="ph mx-auto mb-3">
+            <div class="ph-notch"></div>
+            <div class="ph-screen">
+              <div class="bg-body-tertiary border-bottom px-3 py-2">
+                <div class="fw-bold" style="font-size:17px;">
+                  DishDash <span class="dd-brand">QR</span>
+                </div>
+                <div class="small text-secondary">Pub del Centro · Tavolo 5</div>
+              </div>
+              <div class="flex-grow-1 overflow-hidden px-3 py-3">
+                <div class="alert alert-info d-flex align-items-start gap-2 py-2" role="alert">
+                  <span aria-hidden="true">🛎️</span>
+                  <div class="small">
+                    <div class="fw-semibold">
+                      <span class="t-it">Per ordinare, chiama un cameriere</span><span class="t-en"
+                        >To order, call a waiter</span
+                      >
+                    </div>
+                    <span class="t-it"
+                      >Questo è il menu del locale. La comanda viene presa al tavolo.</span
+                    ><span class="t-en"
+                      >This is the venue menu. Your order is taken at the table.</span
+                    >
+                  </div>
+                </div>
+                <h3
+                  class="text-uppercase text-secondary fw-semibold mb-2"
+                  style="letter-spacing:.04em;font-size:11px;"
+                >
+                  Panini
+                </h3>
+                <ul class="list-group mb-3">
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="fw-medium">Hamburger classico</div>
+                      <small class="text-secondary">Manzo, cheddar, insalata</small>
+                    </div>
+                    <span class="text-nowrap">8,50 €</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="fw-medium">Panino pulled pork</div>
+                      <small class="text-secondary">Coleslaw, salsa BBQ</small>
+                    </div>
+                    <span class="text-nowrap">7,50 €</span>
+                  </li>
+                </ul>
+                <h3
+                  class="text-uppercase text-secondary fw-semibold mb-2"
+                  style="letter-spacing:.04em;font-size:11px;"
+                >
+                  Bevande
+                </h3>
+                <ul class="list-group">
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><div class="fw-medium">Birra artigianale 0,4l</div></div>
+                    <span class="text-nowrap">5,00 €</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="ph-label">
+            <span class="t-it">Cliente · menu in sola lettura</span><span class="t-en"
+              >Guest · read-only menu</span
+            >
+          </div>
+        </div>
+
+        <!-- arrow: waiter takes & confirms -->
+        <div class="col-lg-auto col-12 text-center">
+          <svg
+            class="flow-arrow"
+            width="46"
+            height="24"
+            viewBox="0 0 46 24"
+            fill="none"
+            aria-hidden="true"
+            ><path
+              d="M2 12h38m0 0-7-7m7 7-7 7"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            /></svg
+          >
+          <div class="small text-secondary mt-1">
+            <span class="t-it">il cameriere prende e conferma</span><span class="t-en"
+              >waiter takes &amp; confirms</span
+            >
+          </div>
+        </div>
+
+        <!-- cameriere device: order composer -->
+        <div class="col-auto">
+          <div class="device mx-auto" style="width:320px;">
+            <nav class="navbar navbar-expand bg-body-tertiary border-bottom">
+              <div class="container-fluid px-3">
+                <span class="navbar-brand mb-0 fw-bold"
+                  >DishDash · <span class="dd-brand">Cameriere</span></span
+                >
+              </div>
+            </nav>
+            <div class="device-body p-3">
+              <label class="form-label small mb-1" for="pres-table">Tavolo / punto di ritiro</label>
+              <select class="form-select form-select-sm mb-2" id="pres-table" disabled
+                ><option>Tavolo 5</option></select
+              >
+              <ul class="list-group mb-2">
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center gap-2 py-1"
+                >
+                  <span class="small fw-medium">Hamburger classico</span>
+                  <span class="d-flex align-items-center gap-2"
+                    ><span class="small text-nowrap">8,50 €</span>
+                    <span class="btn-group btn-group-sm"
+                      ><span class="btn btn-outline-secondary disabled">−</span><span
+                        class="btn btn-light disabled"
+                        style="min-width:30px;">1</span
+                      ><span class="btn btn-outline-secondary disabled">+</span></span
+                    ></span
+                  >
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center gap-2 py-1"
+                >
+                  <span class="small fw-medium">Patatine fritte</span>
+                  <span class="d-flex align-items-center gap-2"
+                    ><span class="small text-nowrap">4,00 €</span>
+                    <span class="btn-group btn-group-sm"
+                      ><span class="btn btn-outline-secondary disabled">−</span><span
+                        class="btn btn-light disabled"
+                        style="min-width:30px;">1</span
+                      ><span class="btn btn-outline-secondary disabled">+</span></span
+                    ></span
+                  >
+                </li>
+              </ul>
+              <span class="btn btn-primary w-100 d-flex justify-content-between align-items-center"
+                ><span
+                  ><span class="t-it">Invia comanda</span><span class="t-en">Send order</span> · 2</span
+                ><span class="fw-semibold">12,50 €</span></span
+              >
+              <div class="text-center text-secondary mt-2" style="font-size:11px;">
+                <span class="t-it">Confermata e inviata subito in cucina</span><span class="t-en"
+                  >Confirmed and sent straight to the kitchen</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="ph-label text-center mt-2">
+            <span class="t-it">Cameriere · prende la comanda</span><span class="t-en"
+              >Waiter · takes the order</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <p class="text-secondary small text-center mt-4 mb-0">
+        <span class="t-it"
+          >La comanda salta la coda di attesa del gestore ed entra diretta nella coda dei
+          lavoratori, con il suo numero. Attivi e disattivi la modalità quando vuoi, per ogni
+          locale.</span
+        ><span class="t-en"
+          >The order skips the manager's pending queue and goes straight to the kitchen queue, with
+          its number. Turn the mode on or off anytime, per venue.</span
+        >
+      </p>
+    </div>
+  </section>
+
   <!-- ============================ REPORT ============================ -->
   <section class="sec anchor-offset" id="report">
     <div class="container">
@@ -1378,17 +1581,18 @@
           </h2>
           <p class="lede mx-auto mb-4" style="color:rgba(255,255,255,.75);">
             <span class="t-it"
-              >Ti mostriamo DishDash QR sul tuo menu, dal vivo. Bastano dieci minuti.</span
+              >Apri DishDash QR e inizia: carica il menu, genera i QR e fai partire le comande.</span
             ><span class="t-en"
-              >We'll show you DishDash QR on your own menu, live. It takes ten minutes.</span
+              >Open DishDash QR and get going: load your menu, generate the QRs and start taking
+              orders.</span
             >
           </p>
           <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
-            <a href="mailto:demo@dishdashqr.it" class="btn btn-primary btn-lg"
-              ><span class="t-it">Richiedi una demo</span><span class="t-en">Book a demo</span></a
+            <a href="/" class="btn btn-primary btn-lg"
+              ><span class="t-it">Vai all'app</span><span class="t-en">Open the app</span></a
             >
-            <a href="mailto:demo@dishdashqr.it" class="btn btn-outline-light btn-lg"
-              >demo@dishdashqr.it</a
+            <a href="/login" class="btn btn-outline-light btn-lg"
+              ><span class="t-it">Accedi (staff)</span><span class="t-en">Staff sign-in</span></a
             >
           </div>
           <div class="small" style="color:rgba(255,255,255,.6);">
@@ -1527,6 +1731,10 @@
     display: flex;
     flex-direction: column;
     font-size: 14px;
+  }
+  /* keep the header/wordmark clear of the notch overlay (was sitting under it) */
+  .ph-screen > :global(:first-child) {
+    padding-top: 24px;
   }
   .ph-screen :global(.list-group-item) {
     padding-top: 0.5rem;

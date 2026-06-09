@@ -4,6 +4,10 @@
 // Every transition checks the source state AND the actor's role. Tenant
 // ownership is enforced by the caller (the actor may only act on orders of
 // their own tenant); the superuser never operates on operational orders.
+//
+// In waiter-ordering tenants the 'cameriere' is trusted staff and acts as the
+// gatekeeper: it confirms its own orders (IN_ATTESA → CONFERMATA), so they go
+// straight to the worker queue without a separate gestore approval step.
 import type { Actor, OrderStatus } from '$lib/types';
 
 export interface Transition {
@@ -17,7 +21,7 @@ export interface Transition {
 // MVP transition table — mirrors docs/specifica-funzionale.md §6.
 export const TRANSITIONS: readonly Transition[] = [
   { from: 'CARRELLO', to: 'IN_ATTESA', actors: ['client'] },
-  { from: 'IN_ATTESA', to: 'CONFERMATA', actors: ['gestore'], assignsNumber: true },
+  { from: 'IN_ATTESA', to: 'CONFERMATA', actors: ['gestore', 'cameriere'], assignsNumber: true },
   { from: 'IN_ATTESA', to: 'RIFIUTATA', actors: ['gestore'] },
   { from: 'IN_ATTESA', to: 'ANNULLATA', actors: ['client'] },
   { from: 'CONFERMATA', to: 'IN_PREPARAZIONE', actors: ['lavoratore'] },

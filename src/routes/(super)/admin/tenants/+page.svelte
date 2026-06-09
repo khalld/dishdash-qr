@@ -64,13 +64,35 @@
             </div>
           </div>
           <div class="d-flex align-items-center justify-content-between">
-            <span class="small text-secondary">{t.workers} lavoratori</span>
+            <span class="small text-secondary"
+              >{t.workers} lavoratori · {t.camerieri} camerieri</span
+            >
             {#if t.active}
               <span class="badge rounded-pill text-bg-success">attivo</span>
             {:else}
               <span class="badge rounded-pill text-bg-secondary">sospeso</span>
             {/if}
           </div>
+          <form method="POST" action="?/toggleWaiterMode" use:enhance class="border-top mt-2 pt-2">
+            <input type="hidden" name="tenantId" value={t.id} />
+            <div class="form-check form-switch mb-0">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="waiter-{t.id}"
+                aria-label="Modalità cameriere per {t.name}"
+                checked={t.waiterOrdering}
+                onchange={(e) => e.currentTarget.form?.requestSubmit()}
+              />
+              <label class="form-check-label small" for="waiter-{t.id}">
+                Modalità cameriere
+                <span class="text-secondary"
+                  >— menu in sola lettura, ordini presi dal cameriere</span
+                >
+              </label>
+            </div>
+          </form>
         </div>
       </div>
     </div>

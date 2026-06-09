@@ -98,6 +98,23 @@ ogni accesso ai dati è scopato per tenant fin dalle prime milestone.
 - [ ] (P2) Report avanzati (trend, confronto periodi, voci top)
 - [ ] (P2) Tempo di attesa stimato per il cliente
 
+## M9 — Modalità cameriere (ordine preso dallo staff)
+
+Funzione opzionale per-tenant: invece dell'auto-ordine, il cliente vede il menu in
+sola lettura e un cameriere prende e **conferma** la comanda (che salta la coda di
+attesa del gestore ed entra diretta in quella dei lavoratori).
+
+- [ ] (P1) Flag `waiterOrdering` sul `Tenant` (default false)
+- [ ] (P1) Ruolo `cameriere` (scoped al tenant) in `StaffUser`; auth + guard area
+- [ ] (P1) Toggle del flag: superuser (scheda tenant) e gestore (proprio pannello)
+- [ ] (P1) Provisioning camerieri: superuser (cross-tenant) e gestore (proprio tenant)
+- [ ] (P1) Menu pubblico in sola lettura quando il flag è attivo (UI + enforcement
+      lato server sull'azione di invio)
+- [ ] (P1) Area cameriere: scelta sorgente QR del tenant, composizione comanda, invio
+- [ ] (P1) `IN_ATTESA → CONFERMATA` consentita anche al cameriere (crea + conferma
+      in un colpo, numerazione atomica invariata)
+- [ ] (P1) Bootstrap deploy: account cameriere in `create-superuser` (`CAMERIERE_*`)
+
 ## Feature future (predisporre, non implementare ora)
 
 - [ ] (P2) Stampa comanda (ESC/POS; MVP possibile da browser) — modello già

@@ -15,17 +15,23 @@ app serve più locali (tenant), ciascuno con menu, QR, comande e utenze isolati.
 Non esiste registrazione: le utenze staff sono create dall'alto verso il basso. Il
 cliente è anonimo e legato a un tenant tramite il QR.
 
-| Attore     | Ambito              | Capacità                                                                                                                                                                                                    |
-| ---------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Superuser  | Globale             | Crea tenant; crea gestori e li assegna a un tenant; crea lavoratori; assegna un logo a un tenant                                                                                                            |
-| Gestore    | Un tenant           | Crea utenze lavoratore del proprio tenant; configura il menu (CRUD, quantità, disponibilità runtime); genera N QR etichettati; vede il riepilogo giornaliero/mensile; conferma o annulla/rifiuta le comande |
-| Lavoratore | Un tenant           | Accede e vede solo le comande confermate dal gestore; le prende in carico, le marca pronte/consegnate                                                                                                       |
-| Cliente    | Anonimo, per tenant | Scansiona il QR; compone l'ordine con nickname; riceve riepilogo; traccia la propria comanda                                                                                                                |
+| Attore     | Ambito              | Capacità                                                                                                                                                                                                                          |
+| ---------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Superuser  | Globale             | Crea tenant; crea gestori e li assegna a un tenant; crea lavoratori e camerieri; assegna un logo a un tenant; attiva/disattiva la modalità cameriere di un tenant                                                                 |
+| Gestore    | Un tenant           | Crea utenze lavoratore e cameriere del proprio tenant; attiva/disattiva la modalità cameriere; configura il menu (CRUD, quantità, disponibilità runtime); genera N QR etichettati; vede il riepilogo; conferma/rifiuta le comande |
+| Lavoratore | Un tenant           | Accede e vede solo le comande confermate; le prende in carico, le marca pronte/consegnate                                                                                                                                         |
+| Cameriere  | Un tenant           | Nei tenant in modalità cameriere: vede il menu, compone la comanda per il cliente (scegliendo tavolo/punto di ritiro) e la conferma → entra diretta nella coda dei lavoratori                                                     |
+| Cliente    | Anonimo, per tenant | Scansiona il QR; compone l'ordine con nickname; riceve riepilogo; traccia la propria comanda. Nei tenant in modalità cameriere vede il menu in **sola lettura**                                                                   |
 
-Sia superuser sia gestore possono creare lavoratori: il superuser cross-tenant, il
-gestore solo nel proprio tenant. **La creazione dei gestori è riservata al
-superuser** (il gestore non crea altri gestori). Il superuser iniziale è
-provisionato via seed.
+Sia superuser sia gestore possono creare lavoratori e camerieri: il superuser
+cross-tenant, il gestore solo nel proprio tenant. **La creazione dei gestori è
+riservata al superuser** (il gestore non crea altri gestori). Il superuser
+iniziale è provisionato via seed.
+
+**Modalità cameriere (flag per-tenant).** Ogni tenant ha un flag `waiterOrdering`
+(default `false`). Quando è attivo, l'auto-ordine del cliente è disabilitato (menu
+in sola lettura via QR) e le comande le prende un cameriere. Il flag è gestito sia
+dal superuser sia dal gestore.
 
 ## 3. Multitenancy
 
@@ -46,14 +52,17 @@ provisionato via seed.
 ```mermaid
 flowchart TD
     SU[Superuser - globale]
-    T[Tenant + logo]
+    T[Tenant + logo + flag modalita cameriere]
     G[Gestore - di un tenant]
     L[Lavoratore - di un tenant]
+    C[Cameriere - di un tenant]
 
     SU -->|crea| T
     SU -->|crea e assegna al tenant| G
     SU -->|puo creare| L
+    SU -->|puo creare| C
     G -->|crea nel proprio tenant| L
+    G -->|crea nel proprio tenant| C
 ```
 
 Cliente: nessuna utenza, accesso anonimo via QR del tenant.
@@ -81,6 +90,21 @@ Cliente: nessuna utenza, accesso anonimo via QR del tenant.
 7. La comanda viene consegnata e pagata in contanti (`CONSEGNATA`).
 8. Il gestore consulta il riepilogo giornaliero/mensile del proprio tenant.
 
+### 5.3 Variante: modalità cameriere
+
+Nei tenant con `waiterOrdering` attivo l'auto-ordine del cliente è sostituito dal
+cameriere:
+
+1. Il cliente scansiona il QR → vede il menu del tenant in **sola lettura** (nessun
+   carrello, nessun invio): un avviso lo invita a chiamare il cameriere.
+2. Il cameriere accede alla propria area, sceglie il tavolo/punto di ritiro,
+   compone la comanda dal menu e (facoltativo) annota un nome cliente.
+3. All'invio la comanda viene **creata e subito confermata** dal cameriere: riceve
+   il numero progressivo (per tenant) ed entra direttamente nella coda dei
+   lavoratori (`CONFERMATA`), **saltando la coda di attesa del gestore**.
+4. Da qui il flusso prosegue identico al punto 6 in poi (lavoratore → consegna →
+   riepilogo).
+
 ## 6. Macchina a stati della comanda
 
 ```mermaid
@@ -89,7 +113,7 @@ stateDiagram-v2
     CARRELLO --> IN_ATTESA : invia ordine
     CARRELLO --> [*] : abbandona (non persistito)
 
-    IN_ATTESA --> CONFERMATA : gestore conferma (assegna n°)
+    IN_ATTESA --> CONFERMATA : gestore/cameriere conferma (assegna n°)
     IN_ATTESA --> RIFIUTATA : gestore rifiuta/annulla
     IN_ATTESA --> ANNULLATA : cliente annulla
 
@@ -102,18 +126,20 @@ stateDiagram-v2
     ANNULLATA --> [*]
 ```
 
-| Da              | A               | Trigger                             | Attore             |
-| --------------- | --------------- | ----------------------------------- | ------------------ |
-| CARRELLO        | IN_ATTESA       | invio ordine                        | cliente            |
-| IN_ATTESA       | CONFERMATA      | conferma + assegnazione numero      | gestore            |
-| IN_ATTESA       | RIFIUTATA       | rifiuto/annullamento (es. esaurito) | gestore            |
-| IN_ATTESA       | ANNULLATA       | annullamento prima della conferma   | cliente            |
-| CONFERMATA      | IN_PREPARAZIONE | presa in carico                     | lavoratore         |
-| IN_PREPARAZIONE | PRONTA          | preparazione conclusa               | lavoratore         |
-| PRONTA          | CONSEGNATA      | consegna e incasso contanti         | lavoratore/gestore |
+| Da              | A               | Trigger                             | Attore              |
+| --------------- | --------------- | ----------------------------------- | ------------------- |
+| CARRELLO        | IN_ATTESA       | invio ordine                        | cliente / cameriere |
+| IN_ATTESA       | CONFERMATA      | conferma + assegnazione numero      | gestore / cameriere |
+| IN_ATTESA       | RIFIUTATA       | rifiuto/annullamento (es. esaurito) | gestore             |
+| IN_ATTESA       | ANNULLATA       | annullamento prima della conferma   | cliente             |
+| CONFERMATA      | IN_PREPARAZIONE | presa in carico                     | lavoratore          |
+| IN_PREPARAZIONE | PRONTA          | preparazione conclusa               | lavoratore          |
+| PRONTA          | CONSEGNATA      | consegna e incasso contanti         | lavoratore/gestore  |
 
 Note: `IN_PREPARAZIONE` gestisce più lavoratori sulla stessa coda (presa in carico =
-blocco agli altri). Ogni transizione è verificata anche sul tenant dell'attore.
+blocco agli altri). Ogni transizione è verificata anche sul tenant dell'attore. Nei
+tenant in modalità cameriere, il **cameriere** crea la comanda e la conferma in un
+colpo solo (`IN_ATTESA → CONFERMATA`), così salta la coda di attesa del gestore.
 
 ## 7. Modello dati (indicativo, MongoDB)
 
@@ -124,13 +150,14 @@ blocco agli altri). Ogni transizione è verificata anche sul tenant dell'attore.
   "name": "Pub del Centro",
   "logoUrl": "https://.../logo.png",
   "active": true,
+  "waiterOrdering": false,    // modalità cameriere (default false)
   "settings": {}
 }
 
 // staffUsers
 {
   "_id": "...",
-  "role": "gestore",         // superuser | gestore | lavoratore
+  "role": "gestore",         // superuser | gestore | lavoratore | cameriere
   "tenantId": "...",          // null per superuser (globale)
   "username": "...",
   "passwordHash": "..."
