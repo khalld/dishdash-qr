@@ -271,14 +271,14 @@ Dettaglio operativo in `docs/deploy.md`.
      garantire gli account staff iniziali in produzione: superuser (globale),
      gestore e lavoratore. Il superuser è l'account-cardine provisionato fuori
      dall'app (§3); gestore e lavoratore vengono legati al tenant
-     `BOOTSTRAP_TENANT_NAME`, che **deve già esistere** (altrimenti lo script crea
-     il superuser e poi fallisce). Vedere `docs/deploy.md`.
+     `BOOTSTRAP_TENANT_NAME` (default `Pub del Centro`), **creato dallo script se
+     assente** come convenienza di bootstrap. Vedere `docs/deploy.md`.
 - **Immagine Docker**: `Dockerfile` multi-stage (builder → runner, utente non
   root, healthcheck). `.github/workflows/docker-publish.yml` pubblica anche
   l'immagine su GHCR (opzionale rispetto al deploy su Render).
 - **Segreti** (GitHub → Environment `production`): `RENDER_SERVICE_ID`,
   `RENDER_API_KEY`, `MONGODB_URI`, `SUPERUSER_PASSWORD`, `GESTORE_PASSWORD`,
-  `LAVORATORE_PASSWORD`, `BOOTSTRAP_TENANT_NAME` (più gli username opzionali
+  `LAVORATORE_PASSWORD` (più gli opzionali `BOOTSTRAP_TENANT_NAME` e gli username
   `SUPERUSER_USERNAME` / `GESTORE_USERNAME` / `LAVORATORE_USERNAME`).
   Su Render (dashboard, `sync:false`): `MONGODB_URI`, `ORIGIN`, e le credenziali
   superuser. Nessun segreto è committato.

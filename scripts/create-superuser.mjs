@@ -9,13 +9,14 @@
  *   - lavoratore : tenant-scoped worker of the same tenant.
  *
  * The gestore and lavoratore are attached to the tenant named
- * BOOTSTRAP_TENANT_NAME, which MUST already exist (created by the superuser
- * in-app, or via `npm run seed`). This script NEVER creates a tenant — tenant
- * provisioning stays the superuser's prerogative — and aborts if it is missing.
+ * BOOTSTRAP_TENANT_NAME (default "Pub del Centro"). The tenant is created if it
+ * does not exist yet, so a fresh deploy is self-sufficient and needs no separate
+ * tenant provisioning step. NOTE: this is a bootstrap convenience only — at
+ * runtime, tenant creation remains the superuser's prerogative (CLAUDE.md §3).
  *
- * Idempotent upsert — safe to run multiple times. Creates each account if
- * missing, otherwise resets its password to the configured value so the login
- * credentials always match the secrets after every deploy.
+ * Idempotent upsert — safe to run multiple times. Creates each account (and the
+ * tenant) if missing, otherwise resets each account's password to the configured
+ * value so the login credentials always match the secrets after every deploy.
  *
  * Credentials are read from the environment (no hardcoded values):
  *   MONGODB_URI           (required)
@@ -25,7 +26,7 @@
  *   GESTORE_PASSWORD      (required, min 8 chars)
  *   LAVORATORE_USERNAME   (optional, default: "lavoratore")
  *   LAVORATORE_PASSWORD   (required, min 8 chars)
- *   BOOTSTRAP_TENANT_NAME (required — existing tenant gestore/lavoratore belong to)
+ *   BOOTSTRAP_TENANT_NAME (optional, default: "Pub del Centro" — created if missing)
  *
  * CLI override for the superuser (handy for a one-off local bootstrap):
  *   npm run create-superuser -- <username> <password>
@@ -56,8 +57,10 @@ const gestorePassword = process.env.GESTORE_PASSWORD;
 const lavoratoreUsername = (process.env.LAVORATORE_USERNAME || 'lavoratore').toLowerCase().trim();
 const lavoratorePassword = process.env.LAVORATORE_PASSWORD;
 
-// Tenant the gestore/lavoratore are attached to. Must already exist (see run()).
-const tenantName = (process.env.BOOTSTRAP_TENANT_NAME || '').trim();
+// Tenant the gestore/lavoratore are attached to. Created on the fly if missing
+// (see run()), so it falls back to a sensible default instead of being required.
+const DEFAULT_TENANT_NAME = 'Pub del Centro';
+const tenantName = (process.env.BOOTSTRAP_TENANT_NAME || DEFAULT_TENANT_NAME).trim();
 
 function requirePassword(value, envVar, extraHint) {
   if (!value) {
@@ -78,13 +81,6 @@ requirePassword(
 );
 requirePassword(gestorePassword, 'GESTORE_PASSWORD');
 requirePassword(lavoratorePassword, 'LAVORATORE_PASSWORD');
-
-if (!tenantName) {
-  console.error(
-    '❌  BOOTSTRAP_TENANT_NAME non definita: indica il tenant esistente a cui legare gestore e lavoratore.'
-  );
-  process.exit(1);
-}
 
 // Schemas mirror src/lib/server/models to keep the script self-contained.
 // The superuser is global (tenantId null); gestore/lavoratore carry a tenantId.
@@ -152,17 +148,20 @@ async function run() {
   });
   report('🛡️ ', 'Superuser', superuser);
 
-  // Gestore & lavoratore are tenant-scoped: the target tenant MUST already
-  // exist. This script never creates tenants (CLAUDE.md §3), so abort if absent.
-  const tenant = await Tenant.findOne({ name: tenantName });
-  if (!tenant) {
-    console.error(
-      `\n❌  Tenant "${tenantName}" inesistente. Crealo prima (area superuser o "npm run seed"), poi rilancia.`
-    );
-    await mongoose.disconnect();
-    process.exit(1);
-  }
-  console.log(`\n🏪  Tenant "${tenant.name}" (${tenant._id}).`);
+  // Gestore & lavoratore are tenant-scoped. Bootstrap the tenant if it does not
+  // exist yet so a fresh deploy is self-sufficient (no separate provisioning).
+  // Idempotent: an existing tenant is preserved, only `active` is re-asserted.
+  const existingTenant = await Tenant.findOne({ name: tenantName });
+  const tenant = await Tenant.findOneAndUpdate(
+    { name: tenantName },
+    { $set: { active: true }, $setOnInsert: { logoUrl: null, settings: {} } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  console.log(
+    existingTenant
+      ? `\n🏪  Tenant "${tenant.name}" (${tenant._id}) già presente.`
+      : `\n🏪  Tenant "${tenant.name}" (${tenant._id}) creato.`
+  );
 
   const gestore = await upsertStaffUser({
     username: gestoreUsername,
