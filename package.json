@@ -1,6 +1,6 @@
 {
   "name": "dishdash-qr",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Multitenant QR ordering app for pubs / street-food (SvelteKit + MongoDB)",
   "private": true,
   "type": "module",
