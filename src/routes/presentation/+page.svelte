@@ -89,8 +89,8 @@
           onclick={() => (lang = 'en')}>EN</button
         >
       </div>
-      <a href="#contatti" class="btn btn-primary btn-sm d-none d-sm-inline-flex">
-        <span class="t-it">Richiedi una demo</span><span class="t-en">Book a demo</span>
+      <a href="/" class="btn btn-primary btn-sm d-none d-sm-inline-flex">
+        <span class="t-it">Vai all'app</span><span class="t-en">Open the app</span>
       </a>
     </div>
   </header>
@@ -121,8 +121,8 @@
             >
           </p>
           <div class="d-flex flex-wrap gap-2 mb-4">
-            <a href="#contatti" class="btn btn-primary btn-lg"
-              ><span class="t-it">Richiedi una demo</span><span class="t-en">Book a demo</span></a
+            <a href="/" class="btn btn-primary btn-lg"
+              ><span class="t-it">Vai all'app</span><span class="t-en">Open the app</span></a
             >
             <a href="#come-funziona" class="btn btn-outline-secondary btn-lg"
               ><span class="t-it">Guarda come funziona</span><span class="t-en"
@@ -1581,17 +1581,18 @@
           </h2>
           <p class="lede mx-auto mb-4" style="color:rgba(255,255,255,.75);">
             <span class="t-it"
-              >Ti mostriamo DishDash QR sul tuo menu, dal vivo. Bastano dieci minuti.</span
+              >Apri DishDash QR e inizia: carica il menu, genera i QR e fai partire le comande.</span
             ><span class="t-en"
-              >We'll show you DishDash QR on your own menu, live. It takes ten minutes.</span
+              >Open DishDash QR and get going: load your menu, generate the QRs and start taking
+              orders.</span
             >
           </p>
           <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
-            <a href="mailto:demo@dishdashqr.it" class="btn btn-primary btn-lg"
-              ><span class="t-it">Richiedi una demo</span><span class="t-en">Book a demo</span></a
+            <a href="/" class="btn btn-primary btn-lg"
+              ><span class="t-it">Vai all'app</span><span class="t-en">Open the app</span></a
             >
-            <a href="mailto:demo@dishdashqr.it" class="btn btn-outline-light btn-lg"
-              >demo@dishdashqr.it</a
+            <a href="/login" class="btn btn-outline-light btn-lg"
+              ><span class="t-it">Accedi (staff)</span><span class="t-en">Staff sign-in</span></a
             >
           </div>
           <div class="small" style="color:rgba(255,255,255,.6);">
@@ -1730,6 +1731,10 @@
     display: flex;
     flex-direction: column;
     font-size: 14px;
+  }
+  /* keep the header/wordmark clear of the notch overlay (was sitting under it) */
+  .ph-screen > :global(:first-child) {
+    padding-top: 24px;
   }
   .ph-screen :global(.list-group-item) {
     padding-top: 0.5rem;
