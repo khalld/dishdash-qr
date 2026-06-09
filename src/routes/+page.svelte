@@ -37,6 +37,11 @@
       </div>
     </div>
 
-    <p class="text-center text-secondary small mt-4 mb-0">Pagamento in contanti alla consegna</p>
+    <p class="text-center text-secondary small mt-4 mb-1">Pagamento in contanti alla consegna</p>
+    <p class="text-center small mb-0">
+      <a class="link-secondary text-decoration-none" href="/demo"
+        >Guarda una demo interattiva del flusso completo →</a
+      >
+    </p>
   </div>
 </main>
