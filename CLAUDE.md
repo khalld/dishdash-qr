@@ -268,12 +268,17 @@ Dettaglio operativo in `docs/deploy.md`.
   2. `deploy` — chiama l'API di Render (`JorgeLNJunior/render-deploy`) con
      `RENDER_SERVICE_ID` + `RENDER_API_KEY` solo a CI verde.
   3. `bootstrap-superuser` — esegue `npm run create-superuser` (idempotente) per
-     garantire il superuser iniziale in produzione (unico account provisionato
-     fuori dall'app — vedere §3).
+     garantire gli account staff iniziali in produzione: superuser (globale),
+     gestore e lavoratore. Il superuser è l'account-cardine provisionato fuori
+     dall'app (§3); gestore e lavoratore vengono legati al tenant
+     `BOOTSTRAP_TENANT_NAME`, che **deve già esistere** (altrimenti lo script crea
+     il superuser e poi fallisce). Vedere `docs/deploy.md`.
 - **Immagine Docker**: `Dockerfile` multi-stage (builder → runner, utente non
   root, healthcheck). `.github/workflows/docker-publish.yml` pubblica anche
   l'immagine su GHCR (opzionale rispetto al deploy su Render).
 - **Segreti** (GitHub → Environment `production`): `RENDER_SERVICE_ID`,
-  `RENDER_API_KEY`, `MONGODB_URI`, `SUPERUSER_USERNAME`, `SUPERUSER_PASSWORD`.
-  Su Render (dashboard, `sync:false`): `MONGODB_URI`, `ORIGIN`, e le stesse
-  credenziali superuser. Nessun segreto è committato.
+  `RENDER_API_KEY`, `MONGODB_URI`, `SUPERUSER_PASSWORD`, `GESTORE_PASSWORD`,
+  `LAVORATORE_PASSWORD`, `BOOTSTRAP_TENANT_NAME` (più gli username opzionali
+  `SUPERUSER_USERNAME` / `GESTORE_USERNAME` / `LAVORATORE_USERNAME`).
+  Su Render (dashboard, `sync:false`): `MONGODB_URI`, `ORIGIN`, e le credenziali
+  superuser. Nessun segreto è committato.

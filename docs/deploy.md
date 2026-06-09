@@ -50,13 +50,22 @@ Nel dashboard Render imposta gli env `sync:false`:
 
 Crea l'Environment `production` e aggiungi i secrets:
 
-- `RENDER_SERVICE_ID`, `RENDER_API_KEY`
-- `MONGODB_URI`
-- `SUPERUSER_USERNAME`, `SUPERUSER_PASSWORD`
+- `RENDER_SERVICE_ID`, `RENDER_API_KEY` — trigger del deploy su Render.
+- `MONGODB_URI` — stesso DB di produzione (il job vi accede dal runner).
+- `SUPERUSER_PASSWORD` _(richiesto, ≥8)_, `SUPERUSER_USERNAME` _(opz., default `superadmin`)_.
+- `GESTORE_PASSWORD` _(richiesto, ≥8)_, `GESTORE_USERNAME` _(opz., default `gestore`)_.
+- `LAVORATORE_PASSWORD` _(richiesto, ≥8)_, `LAVORATORE_USERNAME` _(opz., default `lavoratore`)_.
+- `BOOTSTRAP_TENANT_NAME` _(richiesto)_ — nome del tenant **già esistente** a cui
+  legare gestore e lavoratore.
 
-> Il job `bootstrap-superuser` usa `MONGODB_URI` + `SUPERUSER_*` per eseguire
-> `npm run create-superuser` contro il DB di produzione dopo ogni deploy. È
-> idempotente: crea il superuser se manca, altrimenti ne reimposta la password.
+> Il job `bootstrap-superuser` esegue `npm run create-superuser` contro il DB di
+> produzione dopo ogni deploy. Lo script è idempotente e provisiona **tre**
+> account — superuser (globale), gestore e lavoratore — creandoli se mancano o
+> reimpostandone la password. ⚠️ **Prerequisito**: il tenant
+> `BOOTSTRAP_TENANT_NAME` deve **già esistere**. Su un DB nuovo non esiste: al
+> primo run lo script crea il superuser e poi **fallisce** sul tenant mancante.
+> Crea prima il tenant (login come superuser → area tenant, oppure
+> `npm run seed`), poi rilancia il workflow (Actions → Run workflow).
 
 ## Deploy
 

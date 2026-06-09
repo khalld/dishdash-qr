@@ -51,11 +51,11 @@ jobs:
           wait_deploy: true # block the job until Render reports success/failure
 
   bootstrap-superuser:
-    name: Ensure initial superuser
+    name: Ensure initial staff accounts
     needs: deploy
     runs-on: ubuntu-latest
     environment: production
-    # Runs after a successful deploy to guarantee the initial superuser exists.
+    # Runs after a successful deploy to guarantee the initial staff accounts exist.
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
@@ -68,12 +68,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # The initial superuser is the only account provisioned out-of-band
-      # (there is no public registration — see CLAUDE.md §3). Idempotent upsert:
-      # creates it if missing, otherwise resets its password to the secret.
-      - name: Upsert superuser in production DB
+      # Staff accounts are provisioned out-of-band (no public registration —
+      # see CLAUDE.md §3). Idempotent upsert: creates each account if missing,
+      # otherwise resets its password to the secret. The gestore/lavoratore are
+      # attached to BOOTSTRAP_TENANT_NAME, which MUST already exist in the prod
+      # DB (create it via the superuser UI or `npm run seed`) — otherwise the
+      # script provisions the superuser and then aborts on the missing tenant.
+      - name: Upsert staff accounts in production DB
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           SUPERUSER_USERNAME: ${{ secrets.SUPERUSER_USERNAME }}
           SUPERUSER_PASSWORD: ${{ secrets.SUPERUSER_PASSWORD }}
+          GESTORE_USERNAME: ${{ secrets.GESTORE_USERNAME }}
+          GESTORE_PASSWORD: ${{ secrets.GESTORE_PASSWORD }}
+          LAVORATORE_USERNAME: ${{ secrets.LAVORATORE_USERNAME }}
+          LAVORATORE_PASSWORD: ${{ secrets.LAVORATORE_PASSWORD }}
+          BOOTSTRAP_TENANT_NAME: ${{ secrets.BOOTSTRAP_TENANT_NAME }}
         run: npm run create-superuser
