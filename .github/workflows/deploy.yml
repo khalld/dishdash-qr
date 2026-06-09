@@ -37,10 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     # Secrets live in the "production" GitHub Environment, so the job must opt in.
     environment: production
-    # Render deploy is DISABLED. CI (build + type-check) still runs on push.
-    # To re-enable, restore the condition below:
-    #   if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    if: false
+    # Runs on every push to main and on manual dispatch, but only after `ci`
+    # (build + type-check) passes — a broken build never reaches production.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     steps:
       # https://github.com/marketplace/actions/deploy-to-render
       - name: Deploy to Render
@@ -56,10 +55,8 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     environment: production
-    # Disabled together with the deploy job above (it depends on a live deploy).
-    # To re-enable, restore the condition:
-    #   if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    if: false
+    # Runs after a successful deploy to guarantee the initial superuser exists.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
 

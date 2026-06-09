@@ -1,11 +1,11 @@
 # Deploy — Render + GitHub Actions
 
-> ⚠️ **Deploy su Render attualmente DISATTIVATO.** I job `deploy` e
-> `bootstrap-superuser` in `.github/workflows/deploy.yml` hanno `if: false`: la
-> CI (type-check + build) gira ancora a ogni push su `main`, ma nulla viene
-> pubblicato su Render, nemmeno con un run manuale. Per riattivare, ripristina la
-> condizione `if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'`
-> nei due job.
+> ✅ **Deploy su Render ATTIVO.** I job `deploy` e `bootstrap-superuser` in
+> `.github/workflows/deploy.yml` girano a ogni push su `main` (e su run manuale),
+> ma solo dopo che la CI (type-check + build) è verde. **Prerequisito**: servizio
+> Render creato e secrets dell'Environment GitHub `production` configurati (vedi
+> «Configurazione una tantum» qui sotto) — senza, il job `deploy` fallisce. Per
+> disattivare di nuovo, rimetti `if: false` nei due job.
 
 Il deploy è su **Render** e la **build passa sempre da GitHub Actions**. Un push
 su `main` viene pubblicato solo se la CI (type-check + build) è verde.
